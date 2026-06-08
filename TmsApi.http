@@ -1,6 +1,11 @@
 @TmsApi_HostAddress = http://localhost:5034
+@TmsApi_BearerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMSIsImV4cCI6MTg4ODQ3ODQwMH0.7s8n9j8v9s8
 
 GET {{TmsApi_HostAddress}}/api/assessments/results/
 Accept: application/json
 
 ###
+
+GET {{TmsApi_HostAddress}}/api/assessments/results/
+Accept: application/json 
+Authorization: Bearer {{TmsApi_BearerToken}}    
