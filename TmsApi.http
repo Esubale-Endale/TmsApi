@@ -8,4 +8,9 @@ Accept: application/json
 
 GET {{TmsApi_HostAddress}}/api/assessments/results/
 Accept: application/json 
-Authorization: Bearer {{TmsApi_BearerToken}}    
+Authorization: Bearer {{TmsApi_BearerToken}}
+
+### 
+
+Get {{TmsApi_HostAddress}}/api/enrollments/worker-smoke
+Accept: application/json
