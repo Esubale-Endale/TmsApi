@@ -1,4 +1,10 @@
 
+// TODO2:In Program.cs, bind PaymentOptions to the "Payments" section of appsettings.json and enable startup validation.
+// Stuck? builder.Services.AddOptions<PaymentOptions>()
+//.BindConfiguration("Payments")
+// ValidateDataAnnotations()
+//.ValidateOnStart();
+
 // Starter pipeline (do not assume this order is correct)
 using Microsoft.AspNetCore.Authentication;
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +17,8 @@ builder.Services
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton<EnrollmentWorker>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
+
+builder.Services.AddOptions<PaymentOptions>().BindConfiguration("Payments").ValidateDataAnnotations().ValidateOnStart();
 
 builder.Host.UseDefaultServiceProvider(options =>
 {
