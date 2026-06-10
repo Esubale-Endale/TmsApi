@@ -1,15 +1,20 @@
 
 // Starter pipeline (do not assume this order is correct)
+using Microsoft.AspNetCore.Authentication;
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddAuthentication("Training").AddScheme<AuthenticationSchemeOptions, TrainingAuthHandler>("Training", null);
+builder.Services
+    .AddAuthentication("Training")
+    .AddScheme<AuthenticationSchemeOptions,
+    TrainingAuthHandler>("Training", null);
+
 builder.Services.AddAuthorization();
 
 
 var app = builder.Build();
 
 app.UseMiddleware<RequestLoggingMiddleware>();
-app.UseExceptionHandler();
+// app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.UseRouting();
 
