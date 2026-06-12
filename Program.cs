@@ -19,12 +19,12 @@ builder.Services
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton<EnrollmentWorker>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
-
 builder.Services
     .AddOptions<PaymentOptions>()
     .BindConfiguration("Payments")
     .ValidateDataAnnotations()
     .ValidateOnStart();
+builder.Services.AddControllers();
 
 builder.Host.UseDefaultServiceProvider(options =>
 {
@@ -41,6 +41,7 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapControllers();
 
 app.MapGet("/api/assessments/results", () => Results.Ok(new
 {
@@ -54,5 +55,11 @@ app.MapGet("/api/enrollments/worker-smoke", (EnrollmentWorker worker) =>
     worker.ProcessBatch();
     return Results.Ok("processed");
 });
+
+// app.MapGet("/api/enrollments", () =>
+// {
+//     Console.WriteLine("request reached Enrollment endpoint");
+//     return Results.Ok("all");
+// });
 
 app.Run();
