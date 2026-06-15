@@ -1,5 +1,4 @@
-public record CourseRecord(
-    string Id,
+public record CreateCourseRequest(
     string CourseCode,
     string Name,
     string Description
