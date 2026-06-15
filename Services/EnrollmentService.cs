@@ -12,16 +12,25 @@ public interface IEnrollmentService
 
 public class EnrollmentService : IEnrollmentService
 {
-    private readonly Dictionary<string, EnrollmentRecord> _store = new();
+    private readonly Dictionary<string, EnrollmentRecord> _enrollmentStore = new();
     private readonly ILogger<EnrollmentService> _logger;
 
     public EnrollmentService(ILogger<EnrollmentService> logger)
     {
         _logger = logger;
+
+        // --- seed some data ---
+        var e1 = new EnrollmentRecord("1", "1", "c1", DateTime.UtcNow.AddDays(-10));
+        var e2 = new EnrollmentRecord("2", "1", "c2", DateTime.UtcNow.AddDays(-9));
+        var e3 = new EnrollmentRecord("3", "2", "c3", DateTime.UtcNow.AddDays(-8));
+
+        _enrollmentStore[e1.Id] = e1;
+        _enrollmentStore[e2.Id] = e2;
+        _enrollmentStore[e3.Id] = e3;
     }
     public Task<EnrollmentRecord> EnrollAsync(string studentId, string courseCode)
     {
-        var existing = _store.Values
+        var existing = _enrollmentStore.Values
             .FirstOrDefault(e => e.StudentId == studentId && e.CourseCode == courseCode);
 
         if (existing is not null)
@@ -33,14 +42,14 @@ public class EnrollmentService : IEnrollmentService
 
         var id = Guid.NewGuid().ToString("N")[..8];
         var record = new EnrollmentRecord(id, studentId, courseCode, DateTime.UtcNow);
-        _store[id] = record;
+        _enrollmentStore[id] = record;
         _logger.LogInformation("Enrolled {StudentId} in {CourseCode} record {EnrollmentId}",
                 studentId, courseCode, id);
         return Task.FromResult(record);
     }
     public Task<EnrollmentRecord?> GetByIdAsync(string id)
     {
-        _store.TryGetValue(id, out var record);
+        _enrollmentStore.TryGetValue(id, out var record);
         if (record is null)
         {
             _logger.LogWarning("Enrolment {EnrollmentId} not found", id);
@@ -49,12 +58,12 @@ public class EnrollmentService : IEnrollmentService
     }
     public Task<IReadOnlyList<EnrollmentRecord>> GetAllAsync()
     {
-        IReadOnlyList<EnrollmentRecord> all = _store.Values.ToList();
+        IReadOnlyList<EnrollmentRecord> all = _enrollmentStore.Values.ToList();
         return Task.FromResult(all);
     }
     public Task<bool> DeleteAsync(string id)
     {
-        var removed = _store.Remove(id);
+        var removed = _enrollmentStore.Remove(id);
         if (removed)
             _logger.LogInformation("Deleted enrollment {EnrollmentId}", id);
         else
@@ -63,11 +72,4 @@ public class EnrollmentService : IEnrollmentService
     }
 }
 
-//--- The data shape--
-public record EnrollmentRecord(
- string Id,
- string StudentId,
- string CourseCode,
- DateTime EnrolledAt);
-
-public class  TmsDatabaseException(string message) : Exception(message);
+public class TmsDatabaseException(string message) : Exception(message);
