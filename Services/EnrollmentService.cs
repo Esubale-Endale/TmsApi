@@ -19,7 +19,6 @@ public class EnrollmentService : IEnrollmentService
     {
         _logger = logger;
     }
-
     public Task<EnrollmentRecord> EnrollAsync(string studentId, string courseCode)
     {
         var existing = _store.Values
@@ -71,3 +70,4 @@ public record EnrollmentRecord(
  string CourseCode,
  DateTime EnrolledAt);
 
+public class  TmsDatabaseException(string message) : Exception(message);

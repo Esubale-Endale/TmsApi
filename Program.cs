@@ -1,21 +1,11 @@
-
-/*
-TODO2:In Program.cs, bind PaymentOptions to the "Payments" section of appsettings.json and enable startup validation.
- Stuck? builder.Services.AddOptions<PaymentOptions>()
-.BindConfiguration("Payments")
- ValidateDataAnnotations()
-.ValidateOnStart();
-*/
-
-// Starter pipeline (do not assume this order is correct)
 using Microsoft.AspNetCore.Authentication;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddAuthentication("Training")
     .AddScheme<AuthenticationSchemeOptions,
     TrainingAuthHandler>("Training", null);
-
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton<EnrollmentWorker>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
@@ -25,6 +15,7 @@ builder.Services
     .ValidateDataAnnotations()
     .ValidateOnStart();
 builder.Services.AddControllers();
+builder.Services.AddProblemDetails();
 
 builder.Host.UseDefaultServiceProvider(options =>
 {
@@ -35,13 +26,18 @@ builder.Host.UseDefaultServiceProvider(options =>
 var app = builder.Build();
 
 app.UseMiddleware<RequestLoggingMiddleware>();
-// app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.UseRouting();
-
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.UseExceptionHandler();
+app.UseStatusCodePages();
+
+app.MapGet("/api/error", () =>
+{
+    throw new TmsDatabaseException("Simulated database failure for ProblemDetails testing");
+});
 
 app.MapGet("/api/assessments/results", () => Results.Ok(new
 {
@@ -55,11 +51,5 @@ app.MapGet("/api/enrollments/worker-smoke", (EnrollmentWorker worker) =>
     worker.ProcessBatch();
     return Results.Ok("processed");
 });
-
-// app.MapGet("/api/enrollments", () =>
-// {
-//     Console.WriteLine("request reached Enrollment endpoint");
-//     return Results.Ok("all");
-// });
 
 app.Run();

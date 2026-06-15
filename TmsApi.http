@@ -20,3 +20,9 @@ X-Training-User : {{TmsApi_BearerToken}}
 ### 
 Get {{TmsApi_HostAddress}}/api/enrollments/93822040
 Accept: application/json
+
+###
+GET  {{TmsApi_HostAddress}}/api/error
+Accept: application/json
+Content-Type: application/json
+X-Training-User: {{TmsApi_BearerToken}}
