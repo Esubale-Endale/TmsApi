@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 public class TrainingAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
     public TrainingAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options,
-    ILoggerFactory logger,UrlEncoder encoder) : base(options, logger, encoder){}
+    ILoggerFactory logger, UrlEncoder encoder) : base(options, logger, encoder) { }
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         if (!Request.Headers.ContainsKey("X-Training-User"))
