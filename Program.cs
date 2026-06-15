@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.OpenApi;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,7 @@ builder.Services
     .ValidateOnStart();
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
+builder.Services.AddOpenApi();
 
 builder.Host.UseDefaultServiceProvider(options =>
 {
@@ -31,8 +34,17 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.UseExceptionHandler();
 app.UseStatusCodePages();
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.MapScalarApiReference();
+}
+else if (app.Environment.IsProduction())
+{
+    app.UseExceptionHandler();
+}
 
 app.MapGet("/api/error", () =>
 {
@@ -53,3 +65,13 @@ app.MapGet("/api/enrollments/worker-smoke", (EnrollmentWorker worker) =>
 });
 
 app.Run();
+
+/* Your Task: Environment - Aware Configuration
+TODO3:In Production use the exception handler middleware so stack traces
+are never shown to external users.
+Stuck? app.UseExceptionHandler();
+
+TODO4:Runin bothenvironments and verify:
+- In Development: can you browse /scalar/v1 and see your endpoints?
+- In Production: does a thrown exception return ProblemDetails JSON, not a stack trace?
+*/
