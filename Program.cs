@@ -11,6 +11,8 @@ builder.Services
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton<EnrollmentWorker>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
+builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services
     .AddOptions<PaymentOptions>()
     .BindConfiguration("Payments")
@@ -65,13 +67,3 @@ app.MapGet("/api/enrollments/worker-smoke", (EnrollmentWorker worker) =>
 });
 
 app.Run();
-
-/* Your Task: Environment - Aware Configuration
-TODO3:In Production use the exception handler middleware so stack traces
-are never shown to external users.
-Stuck? app.UseExceptionHandler();
-
-TODO4:Runin bothenvironments and verify:
-- In Development: can you browse /scalar/v1 and see your endpoints?
-- In Production: does a thrown exception return ProblemDetails JSON, not a stack trace?
-*/

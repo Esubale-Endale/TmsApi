@@ -1,28 +1,7 @@
 @TmsApi_HostAddress = http://localhost:5034
 @TmsApi_BearerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMSIsImV4cCI6MTg4ODQ3ODQwMH0.7s8n9j8v9s8
 
-POST {{TmsApi_HostAddress}}/api/enrollments
+GET {{TmsApi_HostAddress}}/api/students
+Authorization: Bearer @TmsApi_BearerToken
 Accept: application/json
 Content-Type: application/json
-X-Training-User: {{TmsApi_BearerToken}}
-
-{
-  "studentId": "Stu-001",
-  "courseCode": "CS-001"
-}
-
-###
-
-GET {{TmsApi_HostAddress}}/api/enrollments
-Accept: application/json
-X-Training-User : {{TmsApi_BearerToken}}
-
-### 
-Get {{TmsApi_HostAddress}}/api/enrollments/93822040
-Accept: application/json
-
-###
-GET  {{TmsApi_HostAddress}}/api/error
-Accept: application/json
-Content-Type: application/json
-X-Training-User: {{TmsApi_BearerToken}}
