@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.OpenApi;
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using TmsApi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +23,7 @@ builder.Services
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
+builder.Services.AddDbContext<TmsDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("TmsDatabase")));
 
 builder.Host.UseDefaultServiceProvider(options =>
 {
