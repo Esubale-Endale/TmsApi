@@ -78,7 +78,8 @@ app.MapGet("/api/enrollments/worker-smoke", (EnrollmentWorker worker) =>
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<TmsDbContext>();
-    context.Database.Migrate(); // Applies any pending migrations; keeps migration history intact
+    // Applies any pending migrations; keeps migration history intact
+    context.Database.Migrate(); 
     if (!context.Students.Any())
     {
         var students = new List<Student>

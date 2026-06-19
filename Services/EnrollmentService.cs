@@ -1,5 +1,3 @@
-// --- The contract ---
-using System.Security.Cryptography.X509Certificates;
 
 public interface IEnrollmentService
 {

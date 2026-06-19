@@ -3,5 +3,6 @@ public record StudentRecord(
     string StudentId,
     string Name,
     string Email,
-    string[] EnrolledCourseCodes
+    string[] EnrolledCourseCodes,
+    bool IsActive = true
  );

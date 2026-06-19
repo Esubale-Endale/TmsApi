@@ -1,4 +1,4 @@
-using System.Security.Cryptography.X509Certificates;
+
 public interface ICourseService
 {
     Task<CourseRecord?> CreateAsync(string courseCode, string name, string description);
