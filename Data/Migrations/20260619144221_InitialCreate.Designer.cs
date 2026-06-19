@@ -9,10 +9,10 @@ using TmsApi.Data;
 
 #nullable disable
 
-namespace TmsApi.Migrations
+namespace TmsApi.Data.Migrations
 {
     [DbContext(typeof(TmsDbContext))]
-    [Migration("20260617160557_InitialCreate")]
+    [Migration("20260619144221_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

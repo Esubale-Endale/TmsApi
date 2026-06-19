@@ -8,7 +8,7 @@ using TmsApi.Data;
 
 #nullable disable
 
-namespace TmsApi.Migrations
+namespace TmsApi.Data.Migrations
 {
     [DbContext(typeof(TmsDbContext))]
     partial class TmsDbContextModelSnapshot : ModelSnapshot
