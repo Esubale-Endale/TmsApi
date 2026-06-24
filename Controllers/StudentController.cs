@@ -14,8 +14,8 @@ public class StudetnsController(IStudentService studentService) : ControllerBase
     }
 
     // GET/api/students/{id} returns one or 404
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(string id)
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetById(int id)
     {
         var record = await studentService.GetByIdAsync(id);
         return record is not null ? Ok(record) : NotFound();
@@ -25,13 +25,13 @@ public class StudetnsController(IStudentService studentService) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateStudentRequest request)
     {
-        var record = await studentService.CreateAsync(request.StudentId, request.Name, request.Email, request.CourseCodes);
+        var record = await studentService.CreateAsync( request.RegistrationNumber, request.Name, request.GPA, request.IsActive);
         return CreatedAtAction(nameof(GetById), new { id = record?.Id }, record);
     }
 
     // DELETE /api/students/{id} returns 204 or 404
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(string id)
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
     {
         var deleted = await studentService.DeleteAsync(id);
         return deleted ? NoContent() : NotFound();

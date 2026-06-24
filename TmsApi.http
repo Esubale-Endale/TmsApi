@@ -8,3 +8,7 @@ Content-Type: application/json
 
 ###
 GET {{TmsApi_HostAddress}}/api/test/deferred
+
+###
+
+GET @{{TmsApi_HostAddress}}/api/dashboard/students

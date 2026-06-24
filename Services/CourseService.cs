@@ -1,60 +1,101 @@
 
+using Microsoft.EntityFrameworkCore;
+using TmsApi.Data;
+using TmsApi.Entities;
+
 public interface ICourseService
 {
-    Task<CourseRecord?> CreateAsync(string courseCode, string name, string description);
-    Task<CourseRecord?> GetByIdAsync(string id);
-    Task<IReadOnlyList<CourseRecord>> GetAllAsync();
-    Task<bool> DeleteAsync(string id);
+    Task<Course> CreateAsync(
+        string code,
+        string title,
+        int capacity);
+    Task<Course?> GetByIdAsync(int id);
+    Task<IReadOnlyList<Course>> GetAllAsync();
+    Task<bool> DeleteAsync(int id);
 }
 
 public class CourseService : ICourseService
 {
-    private readonly Dictionary<string, CourseRecord> _courseStore = new();
+    private readonly TmsDbContext _db;
     private readonly ILogger<CourseService> _logger;
 
-    public CourseService(ILogger<CourseService> logger)
+    public CourseService(
+        TmsDbContext db,
+        ILogger<CourseService> logger)
     {
-        this._logger = logger;
-        // --- seed some data ---
-        var c1 = new CourseRecord("1", "c1", "Introduction to Programming", "Learn the basics of programming using C#.");
-        var c2 = new CourseRecord("2", "c2", "Data Structures", "Explore common data structures and their applications.");
-        var c3 = new CourseRecord("3", "c3", "Web Development", "Build modern web applications using ASP.NET Core.");
-        var c4 = new CourseRecord("4", "c4", "Database Systems", "Understand relational databases and SQL.");
+        _db = db;
+        _logger = logger;
+    }
 
-        _courseStore[c1.Id] = c1;
-        _courseStore[c2.Id] = c2;
-        _courseStore[c3.Id] = c3;
-        _courseStore[c4.Id] = c4;
-    }
-    public Task<CourseRecord?> CreateAsync(string courseCode, string name, string description)
+    public async Task<Course> CreateAsync(
+        string code,
+        string title,
+        int capacity)
     {
-        var id = Guid.NewGuid().ToString("N")[..8];
-        var record = new CourseRecord(id, courseCode, name, description);
-        _courseStore[id] = record;
-        _logger.LogInformation("Created course {CourseCode} record {CourseId}", courseCode, id);
-        return Task.FromResult<CourseRecord?>(record);
-    }
-    public Task<CourseRecord?> GetByIdAsync(string id)
-    {
-        _courseStore.TryGetValue(id, out var record);
-        if (record is null)
+        var course = new Course
         {
-            _logger.LogWarning("Course {CourseId} not found", id);
+            Code = code,
+            Title = title,
+            Capacity = capacity
+        };
+
+        _db.Courses.Add(course);
+
+        await _db.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "Created course {CourseCode} with id {CourseId}",
+            code,
+            course.Id);
+
+        return course;
+    }
+
+    public async Task<Course?> GetByIdAsync(int id)
+    {
+        var course = await _db.Courses
+            .Include(c => c.Enrollments)
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+        if (course is null)
+        {
+            _logger.LogWarning(
+                "Course {CourseId} not found",
+                id);
         }
-        return Task.FromResult(record);
+
+        return course;
     }
-    public Task<IReadOnlyList<CourseRecord>> GetAllAsync()
+
+    public async Task<IReadOnlyList<Course>> GetAllAsync()
     {
-        IReadOnlyList<CourseRecord> all = _courseStore.Values.ToList();
-        return Task.FromResult(all);
+        return await _db.Courses
+            .OrderBy(c => c.Title)
+            .ToListAsync();
     }
-    public Task<bool> DeleteAsync(string id)
+
+    public async Task<bool> DeleteAsync(int id)
     {
-        var removed = _courseStore.Remove(id);
-        if (removed)
-            _logger.LogInformation("Deleted course {CourseId}", id);
-        else
-            _logger.LogWarning("Delete failed course {CourseId} not found", id);
-        return Task.FromResult(removed);
+        var course = await _db.Courses
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+        if (course is null)
+        {
+            _logger.LogWarning(
+                "Delete failed. Course {CourseId} not found",
+                id);
+
+            return false;
+        }
+
+        _db.Courses.Remove(course);
+
+        await _db.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "Deleted course {CourseId}",
+            id);
+
+        return true;
     }
 }

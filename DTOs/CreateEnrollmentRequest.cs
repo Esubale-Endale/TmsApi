@@ -1,5 +1,5 @@
 
 public record CreateEnrollmentRequest(
-    string StudentId,
-    string CourseCode
+    int StudentId,
+    int CourseId
 );
