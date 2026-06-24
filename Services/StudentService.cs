@@ -5,20 +5,9 @@ using TmsApi.Entities;
 
 public interface IStudentService
 {
-    Task<Student> CreateAsync(
-        string registrationNumber,
-        string name,
-        decimal gpa,
-        bool isActive);
-
+    Task<Student> CreateAsync( string registrationNumber, string name, decimal gpa, bool isActive);
     Task<Student?> GetByIdAsync(int id);
-
-    Task<IReadOnlyList<Student>> GetAllAsync();
-
-    Task<IReadOnlyList<Student>> GetPagedAsync(
-        int page,
-        CancellationToken cancellationToken = default);
-
+    Task<IReadOnlyList<Student>> GetAllAsync(int page = 1, CancellationToken cancellationToken = default);
     Task<bool> DeleteAsync(int id);
 }
 
@@ -28,19 +17,27 @@ public class StudentService : IStudentService
     private readonly TmsDbContext _db;
     private readonly ILogger<StudentService> _logger;
 
-    public StudentService(
-        TmsDbContext db,
-        ILogger<StudentService> logger)
+    public StudentService( TmsDbContext db, ILogger<StudentService> logger)
     {
         _db = db;
         _logger = logger;
     }
 
-    public async Task<Student> CreateAsync(
-        string registrationNumber,
-        string name,
-        decimal gpa,
-        bool isActive)
+
+    public async Task<IReadOnlyList<Student>> GetAllAsync( int page = 1, CancellationToken cancellationToken = default)
+    {
+        const int pageSize = 20;
+
+        var students = await _db.Students
+            .OrderBy(s => s.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return students;
+    }
+
+    public async Task<Student> CreateAsync( string registrationNumber, string name, decimal gpa, bool isActive)
     {
         var student = new Student
         {
@@ -77,17 +74,7 @@ public class StudentService : IStudentService
 
         return student;
     }
-
-    public async Task<IReadOnlyList<Student>> GetAllAsync()
-    {
-        return await _db.Students
-            .OrderBy(s => s.Name)
-            .ToListAsync();
-    }
-
-    public async Task<IReadOnlyList<Student>> GetPagedAsync(
-        int page,
-        CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<Student>> GetPagedAsync( int page, CancellationToken cancellationToken = default)
     {
         const int pageSize = 20;
 

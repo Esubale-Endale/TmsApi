@@ -15,17 +15,13 @@ public class EnrollmentService : IEnrollmentService
     private readonly TmsDbContext _db;
     private readonly ILogger<EnrollmentService> _logger;
 
-    public EnrollmentService(
-        TmsDbContext db,
-        ILogger<EnrollmentService> logger)
+    public EnrollmentService(TmsDbContext db, ILogger<EnrollmentService> logger)
     {
         _db = db;
         _logger = logger;
     }
 
-    public async Task<Enrollment> EnrollAsync(
-        int studentId,
-        int courseId)
+    public async Task<Enrollment> EnrollAsync(int studentId, int courseId)
     {
         var existing = await _db.Enrollments
             .FirstOrDefaultAsync(e =>
