@@ -1,59 +1,125 @@
+using Microsoft.EntityFrameworkCore;
+using TmsApi.Data;
+using TmsApi.Entities;
+
 
 public interface IStudentService
 {
-    Task<StudentRecord?> CreateAsync(string studentId, string name, string email, string[]? courseCodes);
-    Task<StudentRecord?> GetByIdAsync(string id);
-    Task<IReadOnlyList<StudentRecord>> GetAllAsync();
-    Task<bool> DeleteAsync(string id);
+    Task<Student> CreateAsync(
+        string registrationNumber,
+        string name,
+        decimal gpa,
+        bool isActive);
+
+    Task<Student?> GetByIdAsync(int id);
+
+    Task<IReadOnlyList<Student>> GetAllAsync();
+
+    Task<IReadOnlyList<Student>> GetPagedAsync(
+        int page,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> DeleteAsync(int id);
 }
+
 
 public class StudentService : IStudentService
 {
-    private readonly Dictionary<string, StudentRecord> _studentStore = new();
+    private readonly TmsDbContext _db;
     private readonly ILogger<StudentService> _logger;
 
-    public StudentService(ILogger<StudentService> logger)
+    public StudentService(
+        TmsDbContext db,
+        ILogger<StudentService> logger)
     {
-        this._logger = logger;
-        // --- seed some data ---
-        var s1 = new StudentRecord("1", "s1", "Alice Smith", "alice.smith@example.com", ["c1", "c2"]);
-        var s3 = new StudentRecord("2", "s2", "Bob Johnson", "bob.johnson@example.com", ["c3"]);
-        var s2 = new StudentRecord("3", "s3", "Charlie Brown", "charlie.brown@example.com", ["c4"]);
+        _db = db;
+        _logger = logger;
+    }
 
-        _studentStore[s1.Id] = s1;
-        _studentStore[s2.Id] = s2;
-        _studentStore[s3.Id] = s3;
-    }
-    public Task<StudentRecord?> CreateAsync(string studentId, string name, string email, string[]? courseCodes)
+    public async Task<Student> CreateAsync(
+        string registrationNumber,
+        string name,
+        decimal gpa,
+        bool isActive)
     {
-        var id = Guid.NewGuid().ToString("N")[..8];
-        var record = new StudentRecord(id, studentId, name, email, courseCodes ?? []);
-        _studentStore[id] = record;
-        _logger.LogInformation("Created student {StudentId} record {StudentId}", studentId, id);
-        return Task.FromResult<StudentRecord?>(record);
-        
-    }
-    public Task<StudentRecord?> GetByIdAsync(string id)
-    {
-        _studentStore.TryGetValue(id, out var record);
-        if (record is null)
+        var student = new Student
         {
-            _logger.LogWarning("Student {StudentId} not found", id);
+            RegistrationNumber = registrationNumber,
+            Name = name,
+            GPA = gpa,
+            IsActive = isActive
+        };
+
+        _db.Students.Add(student);
+
+        await _db.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "Created student {RegistrationNumber} with id {StudentId}",
+            registrationNumber,
+            student.Id);
+
+        return student;
+    }
+
+    public async Task<Student?> GetByIdAsync(int id)
+    {
+        var student = await _db.Students
+            .Include(s => s.Enrollments)
+            .FirstOrDefaultAsync(s => s.Id == id);
+
+        if (student is null)
+        {
+            _logger.LogWarning(
+                "Student {StudentId} not found",
+                id);
         }
-        return Task.FromResult(record);
+
+        return student;
     }
-    public Task<IReadOnlyList<StudentRecord>> GetAllAsync()
+
+    public async Task<IReadOnlyList<Student>> GetAllAsync()
     {
-        IReadOnlyList<StudentRecord> all = _studentStore.Values.ToList();
-        return Task.FromResult(all);
+        return await _db.Students
+            .OrderBy(s => s.Name)
+            .ToListAsync();
     }
-    public Task<bool> DeleteAsync(string id)
+
+    public async Task<IReadOnlyList<Student>> GetPagedAsync(
+        int page,
+        CancellationToken cancellationToken = default)
     {
-        var removed = _studentStore.Remove(id);
-        if (removed)
-            _logger.LogInformation("Deleted student {StudentId}", id);
-        else
-            _logger.LogWarning("Delete failed student {StudentId} not found", id);
-        return Task.FromResult(removed);
+        const int pageSize = 20;
+
+        return await _db.Students
+            .OrderBy(s => s.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var student = await _db.Students
+            .FirstOrDefaultAsync(s => s.Id == id);
+
+        if (student is null)
+        {
+            _logger.LogWarning(
+                "Delete failed. Student {StudentId} not found",
+                id);
+
+            return false;
+        }
+
+        _db.Students.Remove(student);
+
+        await _db.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "Deleted student {StudentId}",
+            id);
+
+        return true;
     }
 }

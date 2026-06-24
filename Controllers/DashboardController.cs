@@ -1,78 +1,121 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TmsApi.Data;
 
 namespace TmsApi.Controllers;
+
 [ApiController]
 [Route("api/dashboard")]
 public class DashboardController(TmsDbContext context) : ControllerBase
 {
-    //  Howmanyactive students have GPA >= 3.0?
-    [HttpGet("good-Standing-Students")]
-    public IActionResult GoodStandingStudent()
+    // 1. Paged Students
+    [HttpGet("students")]
+    public async Task<IActionResult> GetPagedStudents( int page = 1, CancellationToken cancellationToken = default)
     {
-        Console.WriteLine("+-----------Good Standing Students-------------+");
-        var query = context.Students.Where(s => s.GPA >= 3.0m && s.IsActive);
-        var results = query.ToList();
-        Console.WriteLine(query);
-        Console.WriteLine("+----------------------------------------------+");
+        const int pageSize = 20;
+
+        var students = await context.Students
+            .OrderBy(s => s.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return Ok(students);
+    }
+
+    // 2. Top 5 Courses by Enrollment Count
+    [HttpGet("top-5-courses")]
+    public async Task<IActionResult> TopCourses( CancellationToken cancellationToken = default)
+    {
+        var result = await context.Enrollments
+            .GroupBy(e => e.Course.Title)
+            .Select(g => new
+            {
+                CourseTitle = g.Key,
+                EnrollmentCount = g.Count()
+            })
+            .OrderByDescending(x => x.EnrollmentCount)
+            .Take(5)
+            .ToListAsync(cancellationToken);
+
+        return Ok(result);
+    }
+
+    // Good Standing Students
+    [HttpGet("good-standing-students")]
+    public async Task<IActionResult> GoodStandingStudent( CancellationToken cancellationToken = default)
+    {
+        var results = await context.Students
+            .Where(s => s.GPA >= 3.0m && s.IsActive)
+            .ToListAsync(cancellationToken);
+
         return Ok(results);
     }
-    // Which courses have the most enrollments, sorted descending?
+
+    // Most Enrolled Courses
     [HttpGet("most-enrolled-courses")]
-    public IActionResult  MostEnrolledCourses()
-    {        
-        var list =  context.Courses
-        .Select(c => new
-        {
-            c.Title,
-            EnrollmentCount = c.Enrollments.Count
-        })
-        .OrderByDescending(x => x.EnrollmentCount);
+    public async Task<IActionResult> MostEnrolledCourses( CancellationToken cancellationToken = default)
+    {
+        var result = await context.Courses
+            .Select(c => new
+            {
+                c.Title,
+                EnrollmentCount = c.Enrollments.Count
+            })
+            .OrderByDescending(x => x.EnrollmentCount)
+            .ToListAsync(cancellationToken);
 
-        var result = list.ToList();
-        return Ok(list);
+        return Ok(result);
     }
 
-    // 3. What is the average GPA per course?
-    [HttpGet("avgpapercourse")]
-    public IActionResult AvgGpaPercourse()
+    // Average GPA Per Course
+    [HttpGet("avg-gpa-per-course")]
+    public async Task<IActionResult> AvgGpaPerCourse( CancellationToken cancellationToken = default)
     {
-                
-        var list =  context.Enrollments
-        .GroupBy(e => e.Course.Title)
-        .Select(g => new
-        {
-        Course = g.Key,
-        AverageGPA = g.Average(e => e.Student.GPA)
-        })
-        .ToList();
+        var result = await context.Enrollments
+            .GroupBy(e => e.Course.Title)
+            .Select(g => new
+            {
+                Course = g.Key,
+                AverageGPA = g.Average(e => e.Student.GPA)
+            })
+            .ToListAsync(cancellationToken);
 
-        return Ok(list);
+        return Ok(result);
     }
-    // 4. Which students have zero enrollments? (Show both patterns)
-    // o Approach A(Using Subquery):
-    [HttpGet("zeroEnrollmentsubquery")]
-    public IActionResult ZeroEnrolledStudentsSubQuery()
+
+    // Students With No Enrollments - Subquery
+    [HttpGet("zero-enrollment-subquery")]
+    public async Task<IActionResult> ZeroEnrolledStudentsSubQuery(
+        CancellationToken cancellationToken = default)
     {
-                
-        var list =  context.Students
-        .Where(s => !s.Enrollments.Any())
-        .Select(s => s.Name)
-        .ToList();
-        return Ok(list);
-           }
-    // o Approach B(Using EF Core 10 LeftJoin):
-    [HttpGet("zeroEnrollmentleftjoin")]
-    public IActionResult ZeroEnrolledStudentsLeftJoin()
+        var result = await context.Students
+            .Where(s => !s.Enrollments.Any())
+            .Select(s => s.Name)
+            .ToListAsync(cancellationToken);
+
+        return Ok(result);
+    }
+
+    // Students With No Enrollments - Left Join
+    [HttpGet("zero-enrollment-leftjoin")]
+    public async Task<IActionResult> ZeroEnrolledStudentsLeftJoin(
+        CancellationToken cancellationToken = default)
     {
-    var list =  context.Students
-    .LeftJoin(context.Enrollments,
-    s => s.Id,
-    e => e.StudentId,
-    (s, e) => new { s, e })
-    .Where(x => x.e == null)
-    .Select(x => x.s.Name)
-    .ToList();
-    return Ok(list);
+        var result = await context.Students
+            .GroupJoin(
+                context.Enrollments,
+                s => s.Id,
+                e => e.StudentId,
+                (s, enrollments) => new
+                {
+                    Student = s,
+                    Enrollments = enrollments
+                })
+            .Where(x => !x.Enrollments.Any())
+            .Select(x => x.Student.Name)
+            .ToListAsync(cancellationToken);
+
+        return Ok(result);
     }
 }
