@@ -30,13 +30,13 @@ public class CourseService : ICourseService
     public async Task<Course> CreateAsync(
         string code,
         string title,
-        int capacity)
+        int maxCapacity)
     {
         var course = new Course
         {
             Code = code,
             Title = title,
-            Capacity = capacity
+            MaxCapacity = maxCapacity
         };
 
         _db.Courses.Add(course);
