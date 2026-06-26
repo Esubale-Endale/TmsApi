@@ -6,8 +6,33 @@ namespace TmsApi.Controllers;
 
 [ApiController]
 [Route("api/dashboard")]
-public class DashboardController(TmsDbContext context) : ControllerBase
+public class DashboardController(TmsDbContext context, IEnrollmentService enrollmentService) : ControllerBase
 {
+    [HttpPost("archive")]
+    public async Task<IActionResult> Archive(CancellationToken ct)
+    {
+        await enrollmentService.ArchiveOldEnrollmentsAsync(
+            DateTime.UtcNow.AddYears(-5),
+            ct);
+
+        return Ok();
+    }
+    [HttpGet("students")]
+    public async Task<IActionResult> Students()
+    {
+        var students = await context.Students.ToListAsync();
+
+        return Ok(students);
+    }
+[HttpGet("students/all")]
+public async Task<IActionResult> AllStudents()
+{
+    var students = await context.Students
+        .IgnoreQueryFilters()
+        .ToListAsync();
+
+    return Ok(students);
+}
     [HttpGet("optimized")]
     public async Task<IActionResult> Optimized(CancellationToken ct)
     {
@@ -41,7 +66,7 @@ public class DashboardController(TmsDbContext context) : ControllerBase
         return Ok();
     }
     // 1. Paged Students
-    [HttpGet("students")]
+    [HttpGet("students/stud")]
     public async Task<IActionResult> GetPagedStudents( int page = 1, CancellationToken cancellationToken = default)
     {
         const int pageSize = 20;

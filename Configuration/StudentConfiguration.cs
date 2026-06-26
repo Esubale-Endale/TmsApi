@@ -26,6 +26,7 @@ public class StudentConfiguration
             .IsUnique();
         builder.Property<DateTime>("LastUpdated");
         builder.Property(s => s.Version)
-       .IsRowVersion();
+            .IsRowVersion();
+        builder.HasQueryFilter(s => !s.IsDeleted);
     }
 }

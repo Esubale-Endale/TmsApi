@@ -8,6 +8,7 @@ public interface IEnrollmentService
     Task<Enrollment?> GetByIdAsync(int id);
     Task<IReadOnlyList<Enrollment>> GetAllAsync();
     Task<bool> DeleteAsync(int id);
+    public Task ArchiveOldEnrollmentsAsync(DateTime cutoff, CancellationToken ct);
 }
 
 public class EnrollmentService : IEnrollmentService
@@ -20,7 +21,6 @@ public class EnrollmentService : IEnrollmentService
         _db = db;
         _logger = logger;
     }
-
     public async Task<Enrollment> EnrollAsync(int studentId, int courseId)
     {
         var existing = await _db.Enrollments
@@ -57,7 +57,6 @@ public class EnrollmentService : IEnrollmentService
 
         return enrollment;
     }
-
     public async Task<Enrollment?> GetByIdAsync(int id)
     {
         var enrollment = await _db.Enrollments
@@ -74,7 +73,6 @@ public class EnrollmentService : IEnrollmentService
 
         return enrollment;
     }
-
     public async Task<IReadOnlyList<Enrollment>> GetAllAsync()
     {
         return await _db.Enrollments
@@ -82,7 +80,6 @@ public class EnrollmentService : IEnrollmentService
             .Include(e => e.Course)
             .ToListAsync();
     }
-
     public async Task<bool> DeleteAsync(int id)
     {
         var enrollment = await _db.Enrollments
@@ -106,6 +103,14 @@ public class EnrollmentService : IEnrollmentService
             id);
 
         return true;
+    }
+    public async Task ArchiveOldEnrollmentsAsync(DateTime cutoff, CancellationToken ct)
+    {
+        await _db.Enrollments
+            .Where(e => e.EnrolledAt < cutoff)
+            .ExecuteUpdateAsync(s =>
+                s.SetProperty(e => e.IsArchived, true),
+                ct);
     }
 }
 

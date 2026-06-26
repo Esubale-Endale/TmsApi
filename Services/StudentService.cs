@@ -93,8 +93,7 @@ public class StudentService : IStudentService
 
             return false;
         }
-
-        _db.Students.Remove(student);
+         student.IsDeleted = true;
 
         await _db.SaveChangesAsync();
 

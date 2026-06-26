@@ -10,14 +10,12 @@ public class EnrollmentsController(IEnrollmentService enrollmentService) : Contr
         var enrollments = await enrollmentService.GetAllAsync();
         return Ok(enrollments);
     }
-
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
         var record = await enrollmentService.GetByIdAsync(id);
         return record is not null ? Ok(record) : NotFound();
     }
-
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateEnrollmentRequest request)
     {
@@ -30,7 +28,6 @@ public class EnrollmentsController(IEnrollmentService enrollmentService) : Contr
             new { id = record.Id },
             record);
     }
-
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
