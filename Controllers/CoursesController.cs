@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
+using TmsApi.Entities;
+using TmsApi.Services;
 
 [ApiController]
 [Route("api/courses")]
-public class CoursesController(ICourseService courseService)
-    : ControllerBase
+public class CoursesController(ICourseService courseService) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetAll()
@@ -12,38 +13,28 @@ public class CoursesController(ICourseService courseService)
         return Ok(courses);
     }
 
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetById(int id)
+    [HttpGet("{id:int}", Name = nameof(GetCourseById))]
+    public async Task<IActionResult> GetCourseById(int id, CancellationToken ct)
     {
-        var course = await courseService.GetByIdAsync(id);
-
-        return course is not null
-            ? Ok(course)
-            : NotFound();
+        var course = await courseService.GetByIdAsync(id, ct);
+        return course is not null ? Ok(course) : NotFound();
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(
-        [FromBody] CreateCourseRequest request)
+    public async Task<IActionResult> Create(Course course, CancellationToken ct)
     {
-        var course = await courseService.CreateAsync(
-            request.Code,
-            request.Title,
-            request.Capacity);
+        var newCourse = await courseService.CreateAsync(course, ct);
 
         return CreatedAtAction(
-            nameof(GetById),
-            new { id = course.Id },
-            course);
+            nameof(GetCourseById),
+            new { id = newCourse.Id },
+            newCourse);
     }
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await courseService.DeleteAsync(id);
-
-        return deleted
-            ? NoContent()
-            : NotFound();
+        return deleted ? NoContent() : NotFound();
     }
 }

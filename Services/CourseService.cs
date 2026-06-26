@@ -1,70 +1,38 @@
-
 using Microsoft.EntityFrameworkCore;
+
 using TmsApi.Data;
 using TmsApi.Entities;
-
-public interface ICourseService
-{
-    Task<Course> CreateAsync(
-        string code,
-        string title,
-        int capacity);
-    Task<Course?> GetByIdAsync(int id);
-    Task<IReadOnlyList<Course>> GetAllAsync();
-    Task<bool> DeleteAsync(int id);
-}
+using TmsApi.Services;
 
 public class CourseService : ICourseService
 {
     private readonly TmsDbContext _db;
     private readonly ILogger<CourseService> _logger;
 
-    public CourseService(
-        TmsDbContext db,
-        ILogger<CourseService> logger)
+    public CourseService(TmsDbContext db, ILogger<CourseService> logger)
     {
         _db = db;
         _logger = logger;
     }
 
-    public async Task<Course> CreateAsync(
-        string code,
-        string title,
-        int maxCapacity)
+    public async Task<Course> CreateAsync(Course course, CancellationToken ct)
     {
-        var course = new Course
-        {
-            Code = code,
-            Title = title,
-            MaxCapacity = maxCapacity
-        };
-
         _db.Courses.Add(course);
-
-        await _db.SaveChangesAsync();
+        
+        await _db.SaveChangesAsync(ct);
 
         _logger.LogInformation(
-            "Created course {CourseCode} with id {CourseId}",
-            code,
-            course.Id);
+            "Created course {CourseId} ({Code})",
+            course.Id,
+            course.Code);
 
         return course;
     }
-
-    public async Task<Course?> GetByIdAsync(int id)
+    public async Task<Course?> GetByIdAsync(int id, CancellationToken ct)
     {
-        var course = await _db.Courses
-            .Include(c => c.Enrollments)
-            .FirstOrDefaultAsync(c => c.Id == id);
-
-        if (course is null)
-        {
-            _logger.LogWarning(
-                "Course {CourseId} not found",
-                id);
-        }
-
-        return course;
+        return await _db.Courses
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == id, ct);
     }
 
     public async Task<IReadOnlyList<Course>> GetAllAsync()

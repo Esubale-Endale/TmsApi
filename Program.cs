@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+
 using TmsApi.Data;
-using TmsApi.Entities;
+using TmsApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
