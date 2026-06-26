@@ -6,10 +6,67 @@ namespace TmsApi.Controllers;
 
 [ApiController]
 [Route("api/dashboard")]
-public class DashboardController(TmsDbContext context) : ControllerBase
+public class DashboardController(TmsDbContext context, IEnrollmentService enrollmentService) : ControllerBase
 {
-    // 1. Paged Students
+    [HttpPost("archive")]
+    public async Task<IActionResult> Archive(CancellationToken ct)
+    {
+        await enrollmentService.ArchiveOldEnrollmentsAsync(
+            DateTime.UtcNow.AddYears(-5),
+            ct);
+
+        return Ok();
+    }
     [HttpGet("students")]
+    public async Task<IActionResult> Students()
+    {
+        var students = await context.Students.ToListAsync();
+
+        return Ok(students);
+    }
+[HttpGet("students/all")]
+public async Task<IActionResult> AllStudents()
+{
+    var students = await context.Students
+        .IgnoreQueryFilters()
+        .ToListAsync();
+
+    return Ok(students);
+}
+    [HttpGet("optimized")]
+    public async Task<IActionResult> Optimized(CancellationToken ct)
+    {
+        var report = await context.Students
+            .AsNoTracking()
+            .Select(s => new
+            {
+                s.Name,
+                EnrollmentCount = s.Enrollments.Count
+            })
+            .ToListAsync(ct);
+
+        return Ok(report);
+    }
+    [HttpGet("nplus1")]
+    public async Task<IActionResult> NPlusOne(CancellationToken ct)
+    {
+        var students = await context.Students
+            .AsNoTracking()
+            .ToListAsync(ct);
+
+        foreach (var student in students)
+        {
+            var count = await context.Enrollments
+                .AsNoTracking()
+                .CountAsync(e => e.StudentId == student.Id, ct);
+
+            Console.WriteLine($"{student.Name}: {count}");
+        }
+
+        return Ok();
+    }
+    // 1. Paged Students
+    [HttpGet("students/stud")]
     public async Task<IActionResult> GetPagedStudents( int page = 1, CancellationToken cancellationToken = default)
     {
         const int pageSize = 20;
@@ -46,7 +103,7 @@ public class DashboardController(TmsDbContext context) : ControllerBase
     public async Task<IActionResult> GoodStandingStudent( CancellationToken cancellationToken = default)
     {
         var results = await context.Students
-            .Where(s => s.GPA >= 3.0m && s.IsActive)
+            .Where(s => s.GPA >= 3.0m && s.IsActived)
             .ToListAsync(cancellationToken);
 
         return Ok(results);

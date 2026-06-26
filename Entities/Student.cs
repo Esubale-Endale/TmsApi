@@ -6,8 +6,8 @@ public class Student
     public required string RegistrationNumber { get; set; }
     public required string Name { get; set; }
     public decimal GPA { get; set; }
-    public bool IsActive { get; set; }
-
-//  Navigation property for many-to-many  relationship 
+    public bool IsActived { get; set; }
+    public uint Version { get; set; }
+    public bool IsDeleted { get; set; }
     public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
 }

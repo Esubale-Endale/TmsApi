@@ -24,5 +24,9 @@ public class StudentConfiguration
 
         builder.HasIndex(s => s.RegistrationNumber)
             .IsUnique();
+        builder.Property<DateTime>("LastUpdated");
+        builder.Property(s => s.Version)
+            .IsRowVersion();
+        builder.HasQueryFilter(s => !s.IsDeleted);
     }
 }

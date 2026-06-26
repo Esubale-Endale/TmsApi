@@ -73,7 +73,7 @@ app.MapGet("/api/enrollments/worker-smoke", (EnrollmentWorker worker) =>
     worker.ProcessBatch();
     return Results.Ok("processed");
 });
-
+/*
 // Seed test data at startup
 using (var scope = app.Services.CreateScope())
 {
@@ -110,5 +110,5 @@ using (var scope = app.Services.CreateScope())
         context.SaveChanges();
     }
 }
-
+*/
 app.Run();
