@@ -11,7 +11,7 @@ namespace TmsApi.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
-                name: "IsArchive",
+                name: "IsArchieved",
                 table: "Enrollments",
                 newName: "IsArchived");
         }
@@ -22,7 +22,7 @@ namespace TmsApi.Data.Migrations
             migrationBuilder.RenameColumn(
                 name: "IsArchived",
                 table: "Enrollments",
-                newName: "IsArchive");
+                newName: "IsArchieved");
         }
     }
 }

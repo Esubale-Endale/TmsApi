@@ -129,7 +129,7 @@ namespace TmsApi.Data.Migrations
                     b.Property<decimal?>("Grade")
                         .HasColumnType("numeric");
 
-                    b.Property<bool>("IsArchive")
+                    b.Property<bool>("IsArchieved")
                         .HasColumnType("boolean");
 
                     b.Property<int>("StudentId")

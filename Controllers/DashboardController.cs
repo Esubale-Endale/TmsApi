@@ -78,7 +78,7 @@ public class DashboardController(TmsDbContext context) : ControllerBase
     public async Task<IActionResult> GoodStandingStudent( CancellationToken cancellationToken = default)
     {
         var results = await context.Students
-            .Where(s => s.GPA >= 3.0m && s.IsActive)
+            .Where(s => s.GPA >= 3.0m && s.IsActived)
             .ToListAsync(cancellationToken);
 
         return Ok(results);

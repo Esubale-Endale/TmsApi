@@ -11,7 +11,7 @@ namespace TmsApi.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<bool>(
-                name: "IsArchive",
+                name: "IsArchieved",
                 table: "Enrollments",
                 type: "boolean",
                 nullable: false,
@@ -22,7 +22,7 @@ namespace TmsApi.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "IsArchive",
+                name: "IsArchieved",
                 table: "Enrollments");
         }
     }

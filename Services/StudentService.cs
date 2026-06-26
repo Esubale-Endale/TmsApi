@@ -22,8 +22,6 @@ public class StudentService : IStudentService
         _db = db;
         _logger = logger;
     }
-
-
     public async Task<IReadOnlyList<Student>> GetAllAsync( int page = 1, CancellationToken cancellationToken = default)
     {
         const int pageSize = 20;
@@ -36,15 +34,14 @@ public class StudentService : IStudentService
 
         return students;
     }
-
-    public async Task<Student> CreateAsync( string registrationNumber, string name, decimal gpa, bool isActive)
+    public async Task<Student> CreateAsync( string registrationNumber, string name, decimal gpa, bool isActived)
     {
         var student = new Student
         {
             RegistrationNumber = registrationNumber,
             Name = name,
             GPA = gpa,
-            IsActive = isActive
+            IsActived = isActived
         };
 
         _db.Students.Add(student);
@@ -58,7 +55,6 @@ public class StudentService : IStudentService
 
         return student;
     }
-
     public async Task<Student?> GetByIdAsync(int id)
     {
         var student = await _db.Students
@@ -84,7 +80,6 @@ public class StudentService : IStudentService
             .Take(pageSize)
             .ToListAsync(cancellationToken);
     }
-
     public async Task<bool> DeleteAsync(int id)
     {
         var student = await _db.Students
@@ -109,4 +104,12 @@ public class StudentService : IStudentService
 
         return true;
     }
+    // public async Task UpdateStudentAsync(Student student, CancellationToken ct)
+    // {
+    //     _db.Entry(student)
+    //         .Property("LastUpdated")
+    //         .CurrentValue = DateTime.UtcNow;
+
+    //     await _db.SaveChangesAsync(ct);
+    // }
 }
