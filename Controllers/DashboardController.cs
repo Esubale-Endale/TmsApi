@@ -8,6 +8,38 @@ namespace TmsApi.Controllers;
 [Route("api/dashboard")]
 public class DashboardController(TmsDbContext context) : ControllerBase
 {
+    [HttpGet("optimized")]
+    public async Task<IActionResult> Optimized(CancellationToken ct)
+    {
+        var report = await context.Students
+            .AsNoTracking()
+            .Select(s => new
+            {
+                s.Name,
+                EnrollmentCount = s.Enrollments.Count
+            })
+            .ToListAsync(ct);
+
+        return Ok(report);
+    }
+    [HttpGet("nplus1")]
+    public async Task<IActionResult> NPlusOne(CancellationToken ct)
+    {
+        var students = await context.Students
+            .AsNoTracking()
+            .ToListAsync(ct);
+
+        foreach (var student in students)
+        {
+            var count = await context.Enrollments
+                .AsNoTracking()
+                .CountAsync(e => e.StudentId == student.Id, ct);
+
+            Console.WriteLine($"{student.Name}: {count}");
+        }
+
+        return Ok();
+    }
     // 1. Paged Students
     [HttpGet("students")]
     public async Task<IActionResult> GetPagedStudents( int page = 1, CancellationToken cancellationToken = default)
