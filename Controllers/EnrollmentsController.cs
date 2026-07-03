@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
+using TmsApi.Dtos;
+using TmsApi.Services;
 
 [ApiController]
 [Route("api/enrollments")]
-public class EnrollmentsController(IEnrollmentService enrollmentService) : ControllerBase
+public class EnrollmentsController(ICourseService courseService, IEnrollmentService enrollmentService) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetAll()
@@ -10,23 +12,43 @@ public class EnrollmentsController(IEnrollmentService enrollmentService) : Contr
         var enrollments = await enrollmentService.GetAllAsync();
         return Ok(enrollments);
     }
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetById(int id)
+    
+    [HttpGet("{id:int}", Name = "GetById")]
+    public async Task<IActionResult> GetEnrollment(int courseId, int id, CancellationToken ct)
     {
-        var record = await enrollmentService.GetByIdAsync(id);
-        return record is not null ? Ok(record) : NotFound();
+        var enrollment = await enrollmentService.GetByIdAsync(courseId, id, ct);
+        return enrollment is not null ? Ok(enrollment) : NotFound();
     }
+    
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateEnrollmentRequest request)
+    public async Task<IActionResult> EnrollStudent(int courseId, EnrollStudentRequest request, CancellationToken ct)
     {
-        var record = await enrollmentService.EnrollAsync(
-            request.StudentId,
-            request.CourseId);
-
+        var course = await courseService.GetByIdAsync(courseId, ct);
+        if (course is null)
+        {
+            return NotFound();
+        }
+        if (course.EnrollmentCount >= course.MaxCapacity)
+        {
+            return Conflict(new ProblemDetails
+            {
+                Title = "Course is full",
+                Detail = $"Course '{course.Title}' has reached its maximum capacity of {course.MaxCapacity}.",
+                Status = StatusCodes.Status409Conflict
+            });
+        }
+        var enrollment = await enrollmentService.CreateAsync(
+                courseId,
+                request,
+                ct);
         return CreatedAtAction(
-            nameof(GetById),
-            new { id = record.Id },
-            record);
+            nameof(GetEnrollment),
+            new
+            {
+                courseId,
+                id = enrollment.Id
+            },
+            enrollment); 
     }
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)

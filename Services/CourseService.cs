@@ -15,7 +15,7 @@ public class CourseService : ICourseService
         _db = db;
         _logger = logger;
     }
-
+    public Task<bool> CodeExistsAsync(string Code, CancellationToken ct)=> _db.Courses.AsNoTracking().AnyAsync(c => c.Code == Code, ct);
     public async Task<CourseResponseDto> CreateAsync(CreateCourseRequest request, CancellationToken ct)
     {
         var course = new Course
@@ -34,28 +34,28 @@ public class CourseService : ICourseService
             course.Id,
             course.Code);
 
-        return new CourseResponseDto
-        {
-            Id = course.Id,
-            Code = course.Code,
-            Title = course.Title,
-            MaxCapacity = course.MaxCapacity,
-            EnrollmentCount = 0
-        };
+        return new CourseResponseDto(
+            course.Id,
+            course.Code,
+            course.Title,
+            course.MaxCapacity,
+            course.Enrollments.Count
+        )
+        ;
     }
     public async Task<CourseResponseDto?> GetByIdAsync(int id, CancellationToken ct)
     {
         return await _db.Courses
             .AsNoTracking()
             .Where(c => c.Id == id)
-            .Select(c => new CourseResponseDto
-            {
-                Id = c.Id,
-                Code = c.Code,
-                Title = c.Title,
-                MaxCapacity = c.MaxCapacity,
-                EnrollmentCount = c.Enrollments.Count
-            })
+            .Select(c => new CourseResponseDto(
+                c.Id,
+                c.Code,
+                c.Title,
+                c.MaxCapacity,
+                c.Enrollments.Count
+            )
+            )
             .FirstOrDefaultAsync(ct);
     }
     public async Task<IEnumerable<CourseResponseDto>> GetAllAsync(CancellationToken ct)
@@ -64,13 +64,13 @@ public class CourseService : ICourseService
             .AsNoTracking()
             .OrderBy(c => c.Code)
             .Select(c => new CourseResponseDto
-            {
-                Id = c.Id,
-                Code = c.Code,
-                Title = c.Title,
-                MaxCapacity = c.MaxCapacity,
-                EnrollmentCount = c.Enrollments.Count
-            })
+            (
+                c.Id,
+                c.Code,
+                c.Title,
+                c.MaxCapacity,
+                c.Enrollments.Count
+            ))
             .ToListAsync(ct);
     }
     public async Task<bool> DeleteAsync(int id)

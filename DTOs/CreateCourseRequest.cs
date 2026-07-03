@@ -2,16 +2,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TmsApi.Dtos;
 
-public sealed class CreateCourseRequest
+public record CreateCourseRequest
 {
-    [Required]
-    [StringLength(10)]
-    public string Code { get; init; } = string.Empty;
+    [Required, RegularExpression(@"^[A-Z]{3}-\d{3}$", ErrorMessage = "Code must follow the pattern XXX-000 (e.g., CSE-101.")]
+    public required string Code { get; init; }
     
-    [Required]
-    [StringLength(200)]
-    public string Title { get; init; } = string.Empty;
+    [Required, MaxLength(200)]
+    public required string Title { get; init; }
 
-    [Range(1, 500)]
+    [Range(1, 200)]
     public int MaxCapacity { get; init; }
 }

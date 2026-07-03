@@ -1,15 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using TmsApi.Data;
 using TmsApi.Entities;
+using TmsApi.Dtos;
+using TmsApi.Services;
 
-public interface IEnrollmentService
-{
-    Task<Enrollment> EnrollAsync(int studentId, int courseId);
-    Task<Enrollment?> GetByIdAsync(int id);
-    Task<IReadOnlyList<Enrollment>> GetAllAsync();
-    Task<bool> DeleteAsync(int id);
-    public Task ArchiveOldEnrollmentsAsync(DateTime cutoff, CancellationToken ct);
-}
+namespace TmsApi.Services;
 
 public class EnrollmentService : IEnrollmentService
 {
@@ -21,58 +16,33 @@ public class EnrollmentService : IEnrollmentService
         _db = db;
         _logger = logger;
     }
-    public async Task<Enrollment> EnrollAsync(int studentId, int courseId)
+public Task<EnrollmentResponseDto?> GetByIdAsync(int courseId, int id, CancellationToken ct) =>
+    _db.Enrollments
+        .AsNoTracking()
+        .Where(e => e.Id == id && e.CourseId == courseId)
+        .Select(e => new EnrollmentResponseDto(e.Id, e.CourseId, e.
+        StudentId, e.EnrolledAt))
+        .FirstOrDefaultAsync(ct);
+public async Task<EnrollmentResponseDto> CreateAsync(int courseId, EnrollStudentRequest request, CancellationToken ct)
+{
+    var enrollment = new Enrollment
     {
-        var existing = await _db.Enrollments
-            .FirstOrDefaultAsync(e =>
-                e.StudentId == studentId &&
-                e.CourseId == courseId);
+        CourseId = courseId,
+        StudentId = request.StudentId,
+        EnrolledAt = DateTime.UtcNow
+    };
 
-        if (existing is not null)
-        {
-            _logger.LogWarning(
-                "Duplicate enrollment attempt. Student {StudentId} already enrolled in Course {CourseId}",
-                studentId,
-                courseId);
+    _db.Enrollments.Add(enrollment);
 
-            return existing;
-        }
+    await _db.SaveChangesAsync(ct);
 
-        var enrollment = new Enrollment
-        {
-            StudentId = studentId,
-            CourseId = courseId,
-            EnrolledAt = DateTime.UtcNow
-        };
+    _logger.LogInformation(
+        "Student {StudentId} enrolled in course {CourseId}",
+        request.StudentId,
+        courseId);
 
-        _db.Enrollments.Add(enrollment);
-
-        await _db.SaveChangesAsync();
-
-        _logger.LogInformation(
-            "Student {StudentId} enrolled in Course {CourseId}. Enrollment Id {EnrollmentId}",
-            studentId,
-            courseId,
-            enrollment.Id);
-
-        return enrollment;
-    }
-    public async Task<Enrollment?> GetByIdAsync(int id)
-    {
-        var enrollment = await _db.Enrollments
-            .Include(e => e.Student)
-            .Include(e => e.Course)
-            .FirstOrDefaultAsync(e => e.Id == id);
-
-        if (enrollment is null)
-        {
-            _logger.LogWarning(
-                "Enrollment {EnrollmentId} not found",
-                id);
-        }
-
-        return enrollment;
-    }
+    return (await GetByIdAsync(courseId, enrollment.Id, ct))!;
+}
     public async Task<IReadOnlyList<Enrollment>> GetAllAsync()
     {
         return await _db.Enrollments
