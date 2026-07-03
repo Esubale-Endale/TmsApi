@@ -7,6 +7,7 @@ using TmsApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.UseUrls("http://localhost:5000", "https://localhost:7003");
 builder.Services
     .AddAuthentication("Training")
     .AddScheme<AuthenticationSchemeOptions,
@@ -55,5 +56,6 @@ else if (app.Environment.IsProduction())
 {
     app.UseExceptionHandler();
 }
+
 
 app.Run();
