@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
-
+using Tms.Api.Persistence;
 using TmsApi.Data;
+using TmsApi.Filters;
 using TmsApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,7 +23,10 @@ builder.Services
     .BindConfiguration("Payments")
     .ValidateDataAnnotations()
     .ValidateOnStart();
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<AuditLogFilter>();
+});
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
 builder.Services
@@ -51,11 +55,13 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
+    // Seed the database with initial data
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<TmsDbContext>();
+    await DataSeeder.SeedAsync(context);
 }
 else if (app.Environment.IsProduction())
 {
     app.UseExceptionHandler();
 }
-
-
 app.Run();
