@@ -1,7 +1,7 @@
-using TmsApi.Dtos;
-using TmsApi.Entities;
+using Tms.Api.Dtos;
+using Tms.Api.Entities;
 
-namespace TmsApi.Services;
+namespace Tms.Api.Services;
 public interface IEnrollmentService
 {
     Task<EnrollmentResponseDto?> GetByIdAsync(

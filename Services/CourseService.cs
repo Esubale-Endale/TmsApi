@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 
-using TmsApi.Data;
-using TmsApi.Dtos;
-using TmsApi.Entities;
-using TmsApi.Services;
+using Tms.Api.Data;
+using Tms.Api.Dtos;
+using Tms.Api.Entities;
+using Tms.Api.Services;
 
 public class CourseService : ICourseService
 {

@@ -1,4 +1,4 @@
-namespace TmsApi.Entities;
+namespace Tms.Api.Entities;
 
 public class Course
 {

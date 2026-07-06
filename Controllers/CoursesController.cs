@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using TmsApi.Dtos;
-using TmsApi.Entities;
-using TmsApi.Services;
+using Tms.Api.Dtos;
+using Tms.Api.Entities;
+using Tms.Api.Services;
 
 [ApiController]
 [Route("api/courses")]

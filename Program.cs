@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Tms.Api.Persistence;
-using TmsApi.Data;
-using TmsApi.Filters;
-using TmsApi.Services;
+using Tms.Api.Data;
+using Tms.Api.Filters;
+using Tms.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

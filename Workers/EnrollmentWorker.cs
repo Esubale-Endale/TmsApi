@@ -8,7 +8,7 @@
 // }
 
 // Inside EnrollmentWorker.cs...
-using TmsApi.Services;
+using Tms.Api.Services;
 
 public class EnrollmentWorker(IServiceScopeFactory scopeFactory)
 {

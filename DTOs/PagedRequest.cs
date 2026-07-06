@@ -1,4 +1,4 @@
-namespace TmsApi.Dtos;
+namespace Tms.Api.Dtos;
 
 public record PagedRequest
 {

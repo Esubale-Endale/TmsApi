@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using TmsApi.Data;
+using Tms.Api.Data;
 
 #nullable disable
 
-namespace TmsApi.Data.Migrations.RefineTmsModel
+namespace Tms.Api.Data.Migrations.RefineTmsModel
 {
     [DbContext(typeof(TmsDbContext))]
     [Migration("20260624144843_RefineTmsModel")]
