@@ -59,6 +59,7 @@ public class CourseService : ICourseService
             .FirstOrDefaultAsync(ct);
     }
     public async Task<IEnumerable<CourseResponseDto>> GetAllAsync(CancellationToken ct)
+    
     {
         return await _db.Courses
             .AsNoTracking()
@@ -74,6 +75,7 @@ public class CourseService : ICourseService
             .ToListAsync(ct);
     }
     public async Task<bool> DeleteAsync(int id)
+
     {
         var course = await _db.Courses
             .FirstOrDefaultAsync(c => c.Id == id);
@@ -97,4 +99,6 @@ public class CourseService : ICourseService
 
         return true;
     }
+
 }
+
