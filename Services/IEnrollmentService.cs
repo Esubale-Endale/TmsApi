@@ -1,18 +1,20 @@
-using TmsApi.Dtos;
-using TmsApi.Entities;
+using Tms.Api.Dtos;
+using Tms.Api.Entities;
 
-namespace TmsApi.Services;
+namespace Tms.Api.Services;
 public interface IEnrollmentService
 {
     Task<EnrollmentResponseDto?> GetByIdAsync(
         int courseId,
         int id,
-        CancellationToken ct);
+        CancellationToken ct
+        );
 
     Task<EnrollmentResponseDto> CreateAsync(
         int courseId,
         EnrollStudentRequest request,
-        CancellationToken ct);
+        CancellationToken ct
+        );
 
     
     Task<IReadOnlyList<Enrollment>> GetAllAsync();

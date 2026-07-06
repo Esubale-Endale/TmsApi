@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 
-using TmsApi.Data;
-using TmsApi.Dtos;
-using TmsApi.Entities;
-using TmsApi.Services;
+using Tms.Api.Data;
+using Tms.Api.Dtos;
+using Tms.Api.Entities;
+using Tms.Api.Services;
 
 public class CourseService : ICourseService
 {
@@ -54,26 +54,66 @@ public class CourseService : ICourseService
                 c.Title,
                 c.MaxCapacity,
                 c.Enrollments.Count
-            )
-            )
+            ))
             .FirstOrDefaultAsync(ct);
     }
-    public async Task<IEnumerable<CourseResponseDto>> GetAllAsync(CancellationToken ct)
+public async Task<PagedResponse<CourseResponseDto>> GetCoursesAsync(
+PagedRequest request, CancellationToken ct)
+{
+    // TODO 1: Start with a no-tracking IQueryable<Course>:
+    IQueryable<Course> query = _db.Courses.AsNoTracking();
+
+    // TODO 2: If request.Search has a value, append a Where clause: query = query.Where(c => EF.Functions.ILike(c.Title, $"%{request.Search}%") || EF.Functions.ILike(c.Code, $"%{request.Search}%"));
+    // ILike is the case-insensitive LIKE in PostgreSQL using it here means
+    // the search "fund" finds "Web Development Fundamentals" without learners
+    // being surprised by case-sensitivity at lab time.
+    if(!string.IsNullOrWhiteSpace(request.Search))
     {
-        return await _db.Courses
-            .AsNoTracking()
-            .OrderBy(c => c.Code)
-            .Select(c => new CourseResponseDto
-            (
-                c.Id,
-                c.Code,
-                c.Title,
-                c.MaxCapacity,
-                c.Enrollments.Count
-            ))
-            .ToListAsync(ct);
+        query = query.Where(c => 
+            EF.Functions.ILike(c.Title, $"%{request.Search}%") ||
+            EF.Functions.ILike(c.Code, $"%{request.Search}%"));
     }
+
+    
+    // TODO 3: Count BEFORE paging:
+    // This produces one SELECT COUNT(*) statement. If you Count after Skip/Take,
+    // you would get the count of the page, not the total.
+    var totalCount = await query.CountAsync(ct);
+    
+    // TODO 4: Apply OrderBy, then Skip/Take, then Select projection.
+    // For OrderBy, branch on request.OrderBy ∈ { "Title", "Code", "MaxCapacity" }  and apply Descending if request.Descending. Reject unknown OrderBy values silently by falling back to "Title" never let an arbitrary string into the LINQ tree.
+    IQueryable<Course> sortedQuery = request.OrderBy switch
+    {
+        "Code" => request.Descending
+            ? query.OrderByDescending(c => c.Code)
+            : query.OrderBy(c => c.Code),
+
+        "MaxCapacity" => request.Descending
+            ? query.OrderByDescending(c => c.MaxCapacity)
+            : query.OrderBy(c => c.MaxCapacity),
+
+        _ => request.Descending
+            ? query.OrderByDescending(c => c.Title)
+            : query.OrderBy(c => c.Title),
+    };
+
+    // TODO 5: Materialise:
+    var items = await sortedQuery.Skip((request.Page- 1) * request.PageSize)
+    .Take(request.PageSize)
+    .Select(c => new CourseResponseDto(c.Id, c.Code, c.Title,
+    c.MaxCapacity, c.Enrollments.Count))
+    .ToListAsync(ct);
+  
+    // TODO 6:
+    return new PagedResponse<CourseResponseDto> {
+            Items = items,
+            TotalCount = totalCount,
+            Page = request.Page,
+            PageSize = request.PageSize
+        }; 
+}
     public async Task<bool> DeleteAsync(int id)
+
     {
         var course = await _db.Courses
             .FirstOrDefaultAsync(c => c.Id == id);
@@ -97,4 +137,30 @@ public class CourseService : ICourseService
 
         return true;
     }
+    public async Task<IEnumerable<CourseResponseDto>> GetCourseEnrollments(int courseId, CancellationToken ct)
+    {
+        var course = await _db.Courses
+            .AsNoTracking()
+            .Where(c => c.Id == courseId)
+            .Select(c => new CourseResponseDto(
+                c.Id,
+                c.Code,
+                c.Title,
+                c.MaxCapacity,
+                c.Enrollments.Count
+            ))
+            .FirstOrDefaultAsync(ct);
+
+        if (course is null)
+        {
+            _logger.LogWarning(
+                "GetCourseEnrollments failed. Course {CourseId} not found",
+                courseId);
+
+            return Enumerable.Empty<CourseResponseDto>();
+        }
+
+        return new List<CourseResponseDto> { course };
+    }
 }
+

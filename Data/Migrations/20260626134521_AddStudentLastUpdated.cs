@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace TmsApi.Data.Migrations
+namespace Tms.Api.Data.Migrations
 {
     /// <inheritdoc />
     public partial class AddStudentLastUpdated : Migration

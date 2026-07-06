@@ -1,12 +1,14 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
-
-using TmsApi.Data;
-using TmsApi.Services;
+using Tms.Api.Persistence;
+using Tms.Api.Data;
+using Tms.Api.Filters;
+using Tms.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.UseUrls("http://localhost:5000", "https://localhost:7003");
 builder.Services
     .AddAuthentication("Training")
     .AddScheme<AuthenticationSchemeOptions,
@@ -21,7 +23,10 @@ builder.Services
     .BindConfiguration("Payments")
     .ValidateDataAnnotations()
     .ValidateOnStart();
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<AuditLogFilter>();
+});
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
 builder.Services
@@ -50,10 +55,13 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
+    // Seed the database with initial data
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<TmsDbContext>();
+    await DataSeeder.SeedAsync(context);
 }
 else if (app.Environment.IsProduction())
 {
     app.UseExceptionHandler();
 }
-
 app.Run();

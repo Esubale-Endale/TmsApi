@@ -1,26 +1,24 @@
 using Microsoft.AspNetCore.Mvc;
-using TmsApi.Dtos;
-using TmsApi.Entities;
-using TmsApi.Services;
+using Tms.Api.Dtos;
+using Tms.Api.Entities;
+using Tms.Api.Services;
 
 [ApiController]
 [Route("api/courses")]
 public class CoursesController(ICourseService courseService) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetAll(CancellationToken ct)
+    public async Task<IActionResult> GetAll([FromQuery] PagedRequest request, CancellationToken ct)
     {
-        var courses = await courseService.GetAllAsync(ct);
-        return Ok(courses);
+        var result = await courseService.GetCoursesAsync(request, ct);
+        return Ok(result);
     }
-
     [HttpGet("{id:int}", Name = nameof(GetCourseById))]
     public async Task<IActionResult> GetCourseById(int id, CancellationToken ct)
     {
         var course = await courseService.GetByIdAsync(id, ct);
         return course is not null ? Ok(course) : NotFound();
     }
-
     [HttpPost]
     public async Task<IActionResult> Create(CreateCourseRequest request, CancellationToken ct)
     {
@@ -40,7 +38,6 @@ public class CoursesController(ICourseService courseService) : ControllerBase
             new { id = result.Id },
             result);
     }
-
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {

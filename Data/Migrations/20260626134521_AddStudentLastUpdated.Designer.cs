@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using TmsApi.Data;
+using Tms.Api.Data;
 
 #nullable disable
 
-namespace TmsApi.Data.Migrations
+namespace Tms.Api.Data.Migrations
 {
     [DbContext(typeof(TmsDbContext))]
     [Migration("20260626134521_AddStudentLastUpdated")]
