@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace Tms.Api.Data.Migrations
+namespace TmsApi.Data.Migrations
 {
     /// <inheritdoc />
     public partial class RenameCapacityToMaxCapacity : Migration

@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Tms.Api.Data.Migrations.Add_Assessment_Certificate
+namespace TmsApi.Data.Migrations.Add_Assessment_Certificate
 {
     /// <inheritdoc />
     public partial class AddAssessmentAndCertificate : Migration

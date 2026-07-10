@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using Tms.Api.Data;
-using Tms.Api.Entities;
+using TmsApi.Data;
+using TmsApi.Entities;
 
 
 public interface IStudentService

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Tms.Api.Data;
-using Tms.Api.Entities;
-namespace Tms.Api.Persistence;
+using TmsApi.Data;
+using TmsApi.Entities;
+namespace TmsApi.Persistence;
 public static class DataSeeder
 {
     private static readonly (string Code, string Title, int MaxCapacity)

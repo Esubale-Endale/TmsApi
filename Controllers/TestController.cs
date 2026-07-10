@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using Tms.Api;
-using Tms.Api.Data;
+using TmsApi.Data;
 
-namespace Tms.Api.Controllers;
+namespace TmsApi.Controllers;
 
 [ApiController]
 [Route("api/test")]

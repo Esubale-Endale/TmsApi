@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Tms.Api.Data;
-using Tms.Api.Services;
+using TmsApi.Data;
+using TmsApi.Services;
 
-namespace Tms.Api.Controllers;
+namespace TmsApi.Controllers;
 
 [ApiController]
 [Route("api/dashboard")]

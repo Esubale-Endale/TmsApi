@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using Tms.Api.Data;
+using TmsApi.Data;
 
 #nullable disable
 
-namespace Tms.Api.Data.Migrations
+namespace TmsApi.Data.Migrations
 {
     [DbContext(typeof(TmsDbContext))]
     partial class TmsDbContextModelSnapshot : ModelSnapshot

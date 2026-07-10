@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace Tms.Api.Data.Migrations.RefineTmsModel
+namespace TmsApi.Data.Migrations.RefineTmsModel
 {
     /// <inheritdoc />
     public partial class RefineTmsModel : Migration
