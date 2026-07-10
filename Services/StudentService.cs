@@ -1,16 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Tms.Api.Data;
+using Tms.Api.Dtos;
 using Tms.Api.Entities;
-
-
-public interface IStudentService
-{
-    Task<Student> CreateAsync( string registrationNumber, string name, decimal gpa, bool isActive);
-    Task<Student?> GetByIdAsync(int id);
-    Task<IReadOnlyList<Student>> GetAllAsync(int page = 1, CancellationToken cancellationToken = default);
-    Task<bool> DeleteAsync(int id);
-}
-
+namespace Tms.Api.Services;
 
 public class StudentService : IStudentService
 {
@@ -34,41 +26,45 @@ public class StudentService : IStudentService
 
         return students;
     }
-    public async Task<Student> CreateAsync( string registrationNumber, string name, decimal gpa, bool isActived)
+    public async Task<StudentResponseDto> CreateAsync(CreateStudentRequest request, CancellationToken ct)
     {
         var student = new Student
         {
-            RegistrationNumber = registrationNumber,
-            Name = name,
-            GPA = gpa,
-            IsActived = isActived
+            RegistrationNumber = request.RegistrationNumber,
+            Name = request.Name,
+            GPA = request.GPA,
+            IsActived = request.IsActive
         };
 
         _db.Students.Add(student);
 
-        await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync(ct);
 
-        _logger.LogInformation(
-            "Created student {RegistrationNumber} with id {StudentId}",
-            registrationNumber,
-            student.Id);
+        _logger.LogInformation("Created student {RegistrationNumber} with id {StudentId}", student.RegistrationNumber, student.Id);
 
-        return student;
+        return new StudentResponseDto(
+            student.Id,
+            student.RegistrationNumber,
+            student.Name, 
+            student.GPA,
+            student.IsActived,
+            student.Enrollments.Count
+        )
+        ;
     }
-    public async Task<Student?> GetByIdAsync(int id)
+    public async Task<StudentResponseDto?> GetByIdAsync(int id,CancellationToken ct)
     {
-        var student = await _db.Students
-            .Include(s => s.Enrollments)
-            .FirstOrDefaultAsync(s => s.Id == id);
-
-        if (student is null)
-        {
-            _logger.LogWarning(
-                "Student {StudentId} not found",
-                id);
-        }
-
-        return student;
+        return await _db.Students
+           .AsNoTracking()
+           .Where(s=> s.Id == id)
+           .Select(s=> new StudentResponseDto(
+                s.Id,
+                s.RegistrationNumber,
+                s.Name,
+                s.GPA,
+                s.IsActived,
+                s.Enrollments.Count
+           )).FirstOrDefaultAsync(ct); 
     }
     public async Task<IReadOnlyList<Student>> GetPagedAsync( int page, CancellationToken cancellationToken = default)
     {

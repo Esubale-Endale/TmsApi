@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Tms.Api.Dtos;
+using Tms.Api.Services;
 
 [ApiController]
 [Route("api/students")]
@@ -15,17 +17,17 @@ public class StudetnsController(IStudentService studentService) : ControllerBase
 
     // GET/api/students/{id} returns one or 404
     [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetById(int id)
+    public async Task<IActionResult> GetById(int id,CancellationToken ct)
     {
-        var record = await studentService.GetByIdAsync(id);
-        return record is not null ? Ok(record) : NotFound();
+        var student = await studentService.GetByIdAsync(id,ct);
+        return student is not null ? Ok(student) : NotFound();
     }
 
     // POST /api/students creates and returns 201 with Location header
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateStudentRequest request)
+    public async Task<IActionResult> Create(CreateStudentRequest request,CancellationToken ct)
     {
-        var record = await studentService.CreateAsync( request.RegistrationNumber, request.Name, request.GPA, request.IsActive);
+        var record = await studentService.CreateAsync(request,ct);
         return CreatedAtAction(nameof(GetById), new { id = record?.Id }, record);
     }
 
