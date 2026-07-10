@@ -66,15 +66,55 @@ public class StudentService : IStudentService
                 s.Enrollments.Count
            )).FirstOrDefaultAsync(ct); 
     }
-    public async Task<IReadOnlyList<Student>> GetPagedAsync( int page, CancellationToken cancellationToken = default)
+    public Task<bool> RegistrationNumberExistsAsync(string registrationNumber, CancellationToken ct)
     {
-        const int pageSize = 20;
+        return _db.Students.AsNoTracking().AnyAsync(s => s.RegistrationNumber == registrationNumber, ct);
+    }
+    public async Task<PagedResponse<StudentResponseDto>> GetStudentsAsync(PagedRequest reqest, CancellationToken ct = default)
+    {
+        IQueryable<Student> query = _db.Students.AsNoTracking();
+        if (!string.IsNullOrWhiteSpace(reqest.Search))
+        {
+            query = query.Where(s =>
+                EF.Functions.ILike(s.Name, $"%{reqest.Search}%") ||
+                EF.Functions.ILike(s.RegistrationNumber, $"%{reqest.Search}%"));
+        }
 
-        return await _db.Students
-            .OrderBy(s => s.Name)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
+        var totalCount = await query.CountAsync(ct);
+
+        IQueryable<Student> sortedQuery = reqest.OrderBy switch
+        {
+            "RegistrationNumber" => reqest.Descending
+                ? query.OrderByDescending(s => s.RegistrationNumber)
+                : query.OrderBy(s => s.RegistrationNumber),
+            "GPA" => reqest.Descending
+                ? query.OrderByDescending(s => s.GPA)
+                : query.OrderBy(s => s.GPA),
+            _ => reqest.Descending
+                ? query.OrderByDescending(s => s.Name)
+                : query.OrderBy(s => s.Name),
+        };
+
+        var items = await sortedQuery
+            .Skip((reqest.Page - 1) * reqest.PageSize)
+            .Take(reqest.PageSize)
+            .Select(s => new StudentResponseDto(
+                s.Id,
+                s.RegistrationNumber,
+                s.Name,
+                s.GPA,
+                s.IsActived,
+                s.Enrollments.Count
+            ))
+            .ToListAsync(ct);
+
+        return new PagedResponse<StudentResponseDto>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            Page = reqest.Page,
+            PageSize = reqest.PageSize
+        };
     }
     public async Task<bool> DeleteAsync(int id)
     {

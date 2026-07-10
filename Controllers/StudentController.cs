@@ -9,9 +9,9 @@ public class StudetnsController(IStudentService studentService) : ControllerBase
 {
     // GET/api/students returns all student records
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] PagedRequest request, CancellationToken CancellationToken)
     {
-        var students = await studentService.GetAllAsync();
+        var students = await studentService.GetStudentsAsync(request, CancellationToken);
         return Ok(students);
     }
 
@@ -27,8 +27,17 @@ public class StudetnsController(IStudentService studentService) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(CreateStudentRequest request,CancellationToken ct)
     {
-        var record = await studentService.CreateAsync(request,ct);
-        return CreatedAtAction(nameof(GetById), new { id = record?.Id }, record);
+        if (await studentService.RegistrationNumberExistsAsync(request.RegistrationNumber, ct))
+        {
+            return Conflict(new ProblemDetails
+            {
+                Title = "Student registration number already exists",
+                Detail = $"A student with the registration number '{request.RegistrationNumber}' already exists.",
+                Status = StatusCodes.Status409Conflict,
+            });
+        }
+        var student = await studentService.CreateAsync(request,ct);
+        return CreatedAtAction(nameof(GetById), new { id = student?.Id }, student);
     }
 
     // DELETE /api/students/{id} returns 204 or 404

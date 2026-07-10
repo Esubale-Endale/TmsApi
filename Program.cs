@@ -58,7 +58,8 @@ if (app.Environment.IsDevelopment())
     // Seed the database with initial data
     using var scope = app.Services.CreateScope();
     var context = scope.ServiceProvider.GetRequiredService<TmsDbContext>();
-    await DataSeeder.SeedAsync(context);
+    await DataSeeder.SeedCourseAsync(context);
+    await DataSeeder.SeedStudentAsync(context);
 }
 else if (app.Environment.IsProduction())
 {

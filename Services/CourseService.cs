@@ -60,13 +60,8 @@ public class CourseService : ICourseService
 public async Task<PagedResponse<CourseResponseDto>> GetCoursesAsync(
 PagedRequest request, CancellationToken ct)
 {
-    // TODO 1: Start with a no-tracking IQueryable<Course>:
+   
     IQueryable<Course> query = _db.Courses.AsNoTracking();
-
-    // TODO 2: If request.Search has a value, append a Where clause: query = query.Where(c => EF.Functions.ILike(c.Title, $"%{request.Search}%") || EF.Functions.ILike(c.Code, $"%{request.Search}%"));
-    // ILike is the case-insensitive LIKE in PostgreSQL using it here means
-    // the search "fund" finds "Web Development Fundamentals" without learners
-    // being surprised by case-sensitivity at lab time.
     if(!string.IsNullOrWhiteSpace(request.Search))
     {
         query = query.Where(c => 
@@ -74,15 +69,9 @@ PagedRequest request, CancellationToken ct)
             EF.Functions.ILike(c.Code, $"%{request.Search}%"));
     }
 
-    
-    // TODO 3: Count BEFORE paging:
-    // This produces one SELECT COUNT(*) statement. If you Count after Skip/Take,
-    // you would get the count of the page, not the total.
     var totalCount = await query.CountAsync(ct);
-    
-    // TODO 4: Apply OrderBy, then Skip/Take, then Select projection.
-    // For OrderBy, branch on request.OrderBy ∈ { "Title", "Code", "MaxCapacity" }  and apply Descending if request.Descending. Reject unknown OrderBy values silently by falling back to "Title" never let an arbitrary string into the LINQ tree.
-    IQueryable<Course> sortedQuery = request.OrderBy switch
+
+  IQueryable<Course> sortedQuery = request.OrderBy switch
     {
         "Code" => request.Descending
             ? query.OrderByDescending(c => c.Code)
@@ -97,20 +86,24 @@ PagedRequest request, CancellationToken ct)
             : query.OrderBy(c => c.Title),
     };
 
-    // TODO 5: Materialise:
-    var items = await sortedQuery.Skip((request.Page- 1) * request.PageSize)
-    .Take(request.PageSize)
-    .Select(c => new CourseResponseDto(c.Id, c.Code, c.Title,
-    c.MaxCapacity, c.Enrollments.Count))
-    .ToListAsync(ct);
+    var items = await sortedQuery
+        .Skip((request.Page- 1) * request.PageSize)
+        .Take(request.PageSize)
+        .Select(c => new CourseResponseDto(
+            c.Id,
+            c.Code,
+            c.Title,
+            c.MaxCapacity,
+            c.Enrollments.Count
+            ))
+        .ToListAsync(ct);
   
-    // TODO 6:
-    return new PagedResponse<CourseResponseDto> {
-            Items = items,
-            TotalCount = totalCount,
-            Page = request.Page,
-            PageSize = request.PageSize
-        }; 
+        return new PagedResponse<CourseResponseDto> {
+                Items = items,
+                TotalCount = totalCount,
+                Page = request.Page,
+                PageSize = request.PageSize
+            }; 
 }
     public async Task<bool> DeleteAsync(int id)
 
