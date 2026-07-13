@@ -16,7 +16,11 @@ public interface IEnrollmentService
         CancellationToken ct
         );
 
-    
+    Task<IReadOnlyList<EnrollmentResponseDto>> GetByCourseAsync(
+        int courseId,
+        CancellationToken ct
+        );
+
     Task<IReadOnlyList<Enrollment>> GetAllAsync();
     Task<bool> DeleteAsync(int id);
     public Task ArchiveOldEnrollmentsAsync(DateTime cutoff, CancellationToken ct);

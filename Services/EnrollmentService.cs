@@ -3,6 +3,7 @@ using Tms.Api.Data;
 using Tms.Api.Entities;
 using Tms.Api.Dtos;
 using Tms.Api.Services;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Tms.Api.Services;
 
@@ -23,6 +24,21 @@ public Task<EnrollmentResponseDto?> GetByIdAsync(int courseId, int id, Cancellat
         .Select(e => new EnrollmentResponseDto(e.Id, e.CourseId, e.
         StudentId, e.EnrolledAt))
         .FirstOrDefaultAsync(ct);
+
+public async Task<IReadOnlyList<EnrollmentResponseDto>> GetByCourseAsync(
+    int courseId,
+    CancellationToken ct)
+{
+    return await _db.Enrollments
+        .AsNoTracking()
+        .Where(e => e.CourseId == courseId)
+        .Select(e => new EnrollmentResponseDto(
+            e.Id,
+            e.StudentId,
+            e.CourseId,
+            e.EnrolledAt))
+        .ToListAsync(ct);
+}
 public async Task<EnrollmentResponseDto> CreateAsync(int courseId, EnrollStudentRequest request, CancellationToken ct)
 {
     var enrollment = new Enrollment
