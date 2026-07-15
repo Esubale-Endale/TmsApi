@@ -4,4 +4,3 @@
   <Project Path="TmsApi.Domain/TmsApi.Domain.csproj" />
   <Project Path="TmsApi.Infrastructure/TmsApi.Infrastructure.csproj" />
 </Solution>
- 

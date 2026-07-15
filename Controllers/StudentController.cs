@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using TmsApi.Dtos;
+using TmsApi.Application.DTOs;
 using TmsApi.Services;
 
 [ApiController]

@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using TmsApi.Infrastructure.Persistence;
-using TmsApi.Dtos;
-using TmsApi.Entities;
+using TmsApi.Domain.Entities;
+using TmsApi.Application.DTOs;
+using TmsApi.Application.Services;
 
-namespace TmsApi.Services;
+namespace TmsApi.Application.Services;
 
 public class CourseService : ICourseService
 {
