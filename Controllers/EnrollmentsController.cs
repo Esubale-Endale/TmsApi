@@ -6,13 +6,6 @@ using Tms.Api.Services;
 [Route("api/enrollments")]
 public class EnrollmentsController(ICourseService courseService, IEnrollmentService enrollmentService) : ControllerBase
 {
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        var enrollments = await enrollmentService.GetAllAsync();
-        return Ok(enrollments);
-    }
-    
     [HttpGet(Name = "ListCourseEnrollments")]
     [ProducesResponseType(typeof(IReadOnlyList<EnrollmentResponseDto>),
     StatusCodes.Status200OK)]
@@ -20,13 +13,9 @@ public class EnrollmentsController(ICourseService courseService, IEnrollmentServ
     [EndpointSummary("List enrolments for a course")]
     public async Task<IActionResult> GetEnrollments(int courseId, CancellationToken ct)
     {
-        // TODO 4: Confirm the parent course exists (courseService.GetByIdAsync); 404 if not.
         var course = await courseService.GetByIdAsync(courseId,ct);
         if(course is null) return NotFound();
-        // Then
-        return Ok(await enrollmentService.GetByCourseAsync(courseId, ct));
-
-        
+        return Ok(await enrollmentService.GetByCourseAsync(courseId, ct));   
     }
 
     [HttpGet("{id:int}", Name = nameof(GetEnrollment))]

@@ -1,0 +1,13 @@
+TmsApi> curl.exe -i -k "https://localhost:7003/api/v1/courses?page=1&pageSize=20"
+
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Date: Wed, 15 Jul 2026 13:50:35 GMT
+Server: Kestrel
+Transfer-Encoding: chunked
+api-supported-versions: 1.0
+Deprecation: true
+Sunset: Thu, 31 Dec 2026 00:00:00 GMT
+Link: <https://localhost:7003/api/v2//courses>; rel="successor-version"
+
+{"items":[{"id":22,"code":"DAT-201","title":"Advanced SQL and Indexing","maxCapacity":26,"enrollmentCount":0},{"id":15,"code":"CSE-301","title":"Advanced Web API Patterns","maxCapacity":24,"enrollmentCount":0},{"id":17,"code":"CSE-303","title":"Angular Advanced","maxCapacity":24,"enrollmentCount":0},{"id":16,"code":"CSE-302","title":"Angular Fundamentals","maxCapacity":26,"enrollmentCount":0},{"id":30,"code":"AI-101","title":"Applied Machine Learning","maxCapacity":22,"enrollmentCount":0},{"id":12,"code":"CSE-201","title":"ASP.NET Core Fundamentals","maxCapacity":28,"enrollmentCount":0},{"id":14,"code":"CSE-203","title":"Building RESTful Web APIs","maxCapacity":28,"enrollmentCount":0},{"id":25,"code":"ARC-201","title":"Cloud-Native Architecture","maxCapacity":22,"enrollmentCount":0},{"id":27,"code":"DEV-201","title":"Continuous Delivery Pipelines","maxCapacity":22,"enrollmentCount":0},{"id":29,"code":"MOB-201","title":"Cross-Platform Mobile","maxCapacity":22,"enrollmentCount":0},{"id":23,"code":"DAT-202","title":"Data Modelling for the Web","maxCapacity":26,"enrollmentCount":0},{"id":2,"code":"CS-201","title":"Data Structures and Algorithms","maxCapacity":25,"enrollmentCount":1},{"id":21,"code":"DAT-101","title":"Database Design Foundations","maxCapacity":30,"enrollmentCount":0},{"id":33,"code":"UX-201","title":"Design Systems and Tokens","maxCapacity":22,"enrollmentCount":0},{"id":26,"code":"DEV-101","title":"DevOps Foundations","maxCapacity":24,"enrollmentCount":0},{"id":13,"code":"CSE-202","title":"Entity Framework Core and PostgreSQL","maxCapacity":28,"enrollmentCount":0},{"id":18,"code":"CSE-304","title":"Full-Stack Integration","maxCapacity":22,"enrollmentCount":0},{"id":6,"code":"CS-1","title":"Fundamental","maxCapacity":1,"enrollmentCount":0},{"id":4,"code":"CS-0","title":"Fundamental","maxCapacity":1,"enrollmentCount":1},{"id":8,"code":"CSC-002","title":"Fundamental of programing","maxCapacity":11,"enrollmentCount":0}],"totalCount":31,"page":1,"pageSize":20,"totalPages":2,"hasNext":true,"hasPrevious":false}

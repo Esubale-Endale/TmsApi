@@ -25,9 +25,7 @@ public Task<EnrollmentResponseDto?> GetByIdAsync(int courseId, int id, Cancellat
         StudentId, e.EnrolledAt))
         .FirstOrDefaultAsync(ct);
 
-public async Task<IReadOnlyList<EnrollmentResponseDto>> GetByCourseAsync(
-    int courseId,
-    CancellationToken ct)
+public async Task<IReadOnlyList<EnrollmentResponseDto>> GetByCourseAsync( int courseId, CancellationToken ct)
 {
     return await _db.Enrollments
         .AsNoTracking()
@@ -99,7 +97,6 @@ public async Task<EnrollmentResponseDto> CreateAsync(int courseId, EnrollStudent
                 ct);
     }
 }
-
 public class TmsDatabaseException : Exception
 {
     public TmsDatabaseException(string message)
