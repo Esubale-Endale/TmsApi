@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using Tms.Api.Data;
+using TmsApi.Data;
 
 #nullable disable
 
-namespace Tms.Api.Data.Migrations.TestRollBack
+namespace TmsApi.Data.Migrations.TestRollBack
 {
     [DbContext(typeof(TmsDbContext))]
     [Migration("20260624151756_TestRollback")]

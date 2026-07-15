@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Tms.Api.Dtos;
-using Tms.Api.Services;
+using TmsApi.Dtos;
+using TmsApi.Services;
 
 [ApiController]
 [Route("api/enrollments")]

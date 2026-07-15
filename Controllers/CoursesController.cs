@@ -1,7 +1,7 @@
 // using Microsoft.AspNetCore.Mvc;
 // using Microsoft.AspNetCore.Routing;
-// using Tms.Api.Dtos;
-// using Tms.Api.Services;
+// using TmsApi.Dtos;
+// using TmsApi.Services;
 
 // [ApiController]
 // [Route("api/courses")]

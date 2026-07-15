@@ -1,9 +1,9 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Tms.Api.Data;
+using TmsApi.Data;
 
-namespace Tms.Api.Controllers.V1;
+namespace TmsApi.Controllers.V1;
 
 [ApiController]
 [ApiExplorerSettings(GroupName = "v1")]

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Tms.Api.Data.Migrations.TestRollBack
+namespace TmsApi.Data.Migrations.TestRollBack
 {
     /// <inheritdoc />
     public partial class TestRollback : Migration

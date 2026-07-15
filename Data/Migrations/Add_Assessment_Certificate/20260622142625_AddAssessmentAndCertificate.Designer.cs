@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using Tms.Api.Data;
+using TmsApi.Data;
 
 #nullable disable
 
-namespace Tms.Api.Data.Migrations.Add_Assessment_Certificate
+namespace TmsApi.Data.Migrations.Add_Assessment_Certificate
 {
     [DbContext(typeof(TmsDbContext))]
     [Migration("20260622142625_AddAssessmentAndCertificate")]

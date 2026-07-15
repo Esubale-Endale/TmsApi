@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using Tms.Api.Data;
-using Tms.Api.Dtos;
-using Tms.Api.Entities;
-namespace Tms.Api.Services;
+using TmsApi.Data;
+using TmsApi.Dtos;
+using TmsApi.Entities;
+namespace TmsApi.Services;
 
 public class StudentService : IStudentService
 {

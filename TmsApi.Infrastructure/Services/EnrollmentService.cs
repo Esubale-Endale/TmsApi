@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using Tms.Api.Data;
-using Tms.Api.Entities;
-using Tms.Api.Dtos;
-using Tms.Api.Services;
+using TmsApi.Infrastructure.Persistence;
+using TmsApi.Entities;
+using TmsApi.Dtos;
+using TmsApi.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace Tms.Api.Services;
+namespace TmsApi.Services;
 
 public class EnrollmentService : IEnrollmentService
 {

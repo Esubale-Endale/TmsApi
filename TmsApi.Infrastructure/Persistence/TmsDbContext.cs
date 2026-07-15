@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Tms.Api.Entities;
+using TmsApi.Domain.Entities;
 
-namespace Tms.Api.Data;
+namespace TmsApi.Infrastructure.Persistence;
 
 public class TmsDbContext(DbContextOptions<TmsDbContext> options) : DbContext(options)
 {

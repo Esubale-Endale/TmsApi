@@ -1,12 +1,11 @@
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
-using Asp.Versioning;
-using Tms.Api.Persistence;
-using Tms.Api.Data;
-using Tms.Api.Filters;
-using Tms.Api.Services;
-using Tms.Api.Middleware;
+using TmsApi.Infrastructure.Persistence;
+using TmsApi.Filters;
+using TmsApi.Middleware;
+using TmsApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

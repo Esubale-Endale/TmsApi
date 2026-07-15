@@ -1,6 +1,6 @@
-using Tms.Api.Entities;
-using Tms.Api.Dtos;
-namespace Tms.Api.Services;
+using TmsApi.Entities;
+using TmsApi.Dtos;
+namespace TmsApi.Services;
 
 public interface ICourseService
 {

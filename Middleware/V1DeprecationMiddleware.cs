@@ -1,4 +1,4 @@
-namespace Tms.Api.Middleware;
+namespace TmsApi.Middleware;
 
 public class V1DeprecationMiddleware(RequestDelegate next)
 {
