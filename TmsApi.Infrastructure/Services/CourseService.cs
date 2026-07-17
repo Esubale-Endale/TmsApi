@@ -59,7 +59,21 @@ public class CourseService : ICourseService
             ))
             .FirstOrDefaultAsync(ct);
     }
-public async Task<PagedResponse<CourseResponseDto>> GetCoursesAsync(
+    public async Task<CourseResponseDto?> GetByCodeAsync(string code, CancellationToken ct)
+    {
+        return await _db.Courses
+            .AsNoTracking()
+            .Where(c => c.Code == code)
+            .Select(c => new CourseResponseDto(
+                c.Id,
+                c.Code,
+                c.Title,
+                c.MaxCapacity,
+                c.Enrollments.Count
+            ))
+            .FirstOrDefaultAsync(ct);
+    }
+    public async Task<PagedResponse<CourseResponseDto>> GetCoursesAsync(
 PagedRequest request, CancellationToken ct)
 {
    
