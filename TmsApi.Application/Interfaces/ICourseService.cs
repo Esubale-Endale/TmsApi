@@ -1,0 +1,13 @@
+using TmsApi.Domain.Entities;
+using TmsApi.Application.DTOs;
+
+namespace TmsApi.Application.Interfaces;
+
+public interface ICourseService
+{
+    Task<CourseResponseDto> CreateAsync(CreateCourseRequest request, CancellationToken ct);
+    Task<CourseResponseDto?> GetByIdAsync(int id, CancellationToken ct);
+    Task<bool> CodeExistsAsync(string Code, CancellationToken ct);
+    Task<PagedResponse<CourseResponseDto>> GetCoursesAsync(PagedRequest request, CancellationToken ct);
+    Task<bool> DeleteAsync(int id);
+}
