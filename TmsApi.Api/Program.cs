@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using TmsApi.Infrastructure.Persistence;
 using TmsApi.Api.Filters;
-using TmsApi.Middleware;
+using TmsApi.Api.Middleware;
+using TmsApi.Api.Options;
 using TmsApi.Application.Interfaces;
 using TmsApi.Infrastructure.Services;
 
