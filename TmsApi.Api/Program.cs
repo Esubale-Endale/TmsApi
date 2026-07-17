@@ -3,9 +3,10 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using TmsApi.Infrastructure.Persistence;
-using TmsApi.Filters;
+using TmsApi.Api.Filters;
 using TmsApi.Middleware;
-using TmsApi.Services;
+using TmsApi.Application.Interfaces;
+using TmsApi.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +15,7 @@ builder.Services
     .AddAuthentication("Training")
     .AddScheme<AuthenticationSchemeOptions, TrainingAuthHandler>("Training", null);
 builder.Services.AddAuthorization();
-builder.Services.AddSingleton<EnrollmentWorker>();
+// builder.Services.AddSingleton<EnrollmentWorker>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
@@ -49,8 +50,8 @@ builder.Services.AddApiVersioning(options =>
     options.ApiVersionReader = ApiVersionReader.Combine(new UrlSegmentApiVersionReader(), new HeaderApiVersionReader("X-Api-Version"));
 }).AddApiExplorer(options =>
 {
-        options.GroupNameFormat = "'v'VVV";
-        options.SubstituteApiVersionInUrl = true;
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
 });
 
 var app = builder.Build();
