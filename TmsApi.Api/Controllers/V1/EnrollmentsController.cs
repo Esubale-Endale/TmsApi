@@ -2,13 +2,15 @@ using Microsoft.AspNetCore.Mvc;
 using TmsApi.Application.DTOs;
 using TmsApi.Application.Interfaces;
 
+namespace TmsApi.Api.Controllers;
+
 [ApiController]
 [Route("api/enrollments")]
 public class EnrollmentsController(ICourseService courseService, IEnrollmentService enrollmentService) : ControllerBase
 {
     [HttpGet(Name = "ListCourseEnrollments")]
     [ProducesResponseType(typeof(IReadOnlyList<EnrollmentResponseDto>),
-    StatusCodes.Status200OK)]
+        StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [EndpointSummary("List enrolments for a course")]
     public async Task<IActionResult> GetEnrollments(int courseId, CancellationToken ct)
@@ -52,9 +54,9 @@ public class EnrollmentsController(ICourseService courseService, IEnrollmentServ
             });
         }
         var enrollment = await enrollmentService.CreateAsync(
-                courseId,
-                request,
-                ct);
+            courseId,
+            request,
+            ct);
         return CreatedAtAction(
             nameof(GetEnrollment),
             new

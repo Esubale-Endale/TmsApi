@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TmsApi.Domain.Entities;
 
-namespace TmsApi.Configurations;
+namespace TmsApi.Infrastructure.Persistence.Configurations;
 
 public class StudentConfiguration
     : IEntityTypeConfiguration<Student>

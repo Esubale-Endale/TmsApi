@@ -1,4 +1,6 @@
 
+namespace TmsApi.Api.Middleware;
+
 public class RequestLoggingMiddleware
 {
     private readonly RequestDelegate _next;
