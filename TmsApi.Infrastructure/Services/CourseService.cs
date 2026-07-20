@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using TmsApi.Application.Courses.Command;
 using TmsApi.Infrastructure.Persistence;
 using TmsApi.Domain.Entities;
 using TmsApi.Application.DTOs;
@@ -73,7 +74,7 @@ public class CourseService : ICourseService
             ))
             .FirstOrDefaultAsync(ct);
     }
-   public async Task<Course?> GetCourseEntityByCodeAsync(
+    public async Task<Course?> GetCourseEntityByCodeAsync(
     string code,
     CancellationToken ct)
 {
@@ -82,7 +83,7 @@ public class CourseService : ICourseService
         .FirstOrDefaultAsync(c => c.Code == code, ct);
 }
     public async Task<PagedResponse<CourseResponseDto>> GetCoursesAsync(
-PagedRequest request, CancellationToken ct)
+    PagedRequest request, CancellationToken ct)
 {
    
     IQueryable<Course> query = _db.Courses.AsNoTracking();
@@ -129,11 +130,11 @@ PagedRequest request, CancellationToken ct)
                 PageSize = request.PageSize
             }; 
 }
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int id, CancellationToken ct)
 
     {
         var course = await _db.Courses
-            .FirstOrDefaultAsync(c => c.Id == id);
+            .FirstOrDefaultAsync(c => c.Id == id, ct);
 
         if (course is null)
         {
@@ -178,6 +179,29 @@ PagedRequest request, CancellationToken ct)
         }
 
         return new List<CourseResponseDto> { course };
+    }
+    public async Task UpdateAsync(UpdateCourseCommand command, CancellationToken ct)
+    {
+        var course = await _db.Courses
+            .FirstOrDefaultAsync(c => c.Id == command.Id, ct);
+
+        if (course is null)
+        {
+            _logger.LogWarning(
+                "Update failed. Course {CourseId} not found",
+                command.Id);
+
+            throw new InvalidOperationException($"Course with ID {command.Id} not found.");
+        }
+
+        course.Title = command.Title;
+        course.MaxCapacity = command.MaxCapacity;
+
+        await _db.SaveChangesAsync(ct);
+
+        _logger.LogInformation(
+            "Updated course {CourseId}",
+            command.Id);
     }
 }
 

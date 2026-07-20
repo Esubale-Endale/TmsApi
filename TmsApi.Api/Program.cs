@@ -3,6 +3,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Hybrid;
 using Scalar.AspNetCore;
 using TmsApi.Api.ExceptionHandlers;
 using TmsApi.Infrastructure.Persistence;
@@ -16,7 +17,7 @@ using TmsApi.Application.Enrollments.Commands;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.UseUrls("http://localhost:5000", "https://localhost:7003");
+// builder.WebHost.UseUrls("http://localhost:5000", "https://localhost:7003");
 
 builder.Services.AddAuthentication("Training").AddScheme<AuthenticationSchemeOptions, TrainingAuthHandler>("Training", null);
 builder.Services.AddAuthorization();
@@ -42,7 +43,22 @@ builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavi
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
-
+builder.Services.AddHybridCache((options) =>
+{
+    options.DefaultEntryOptions = new HybridCacheEntryOptions
+    {
+        Expiration = TimeSpan.FromMinutes(10),
+        LocalCacheExpiration = TimeSpan.FromMinutes(2)
+    };
+});
+// Production-only  leave commented in lab 
+// builder.Services.AddStackExchangeRedisCache(options => 
+// { 
+// options.Configuration =
+// builder.Configuration.GetConnectionString("Redis");   
+// options.InstanceName = "tms:";
+// builder.Services.AddHybridCache();
+// }); 
 builder.Host.UseDefaultServiceProvider(options =>
 {
     options.ValidateScopes = true;
@@ -59,7 +75,7 @@ builder.Services.AddApiVersioning(options =>
     options.GroupNameFormat = "'v'VVV";
     options.SubstituteApiVersionInUrl = true;
 });
-
+builder.Services.AddScoped<ICachedCourseService, CachedCourseService>();
 var app = builder.Build();
 
 app.UseMiddleware<RequestLoggingMiddleware>();
