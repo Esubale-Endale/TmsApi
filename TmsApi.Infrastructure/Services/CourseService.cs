@@ -73,6 +73,14 @@ public class CourseService : ICourseService
             ))
             .FirstOrDefaultAsync(ct);
     }
+   public async Task<Course?> GetCourseEntityByCodeAsync(
+    string code,
+    CancellationToken ct)
+{
+    return await _db.Courses
+        .Include(c => c.Enrollments)
+        .FirstOrDefaultAsync(c => c.Code == code, ct);
+}
     public async Task<PagedResponse<CourseResponseDto>> GetCoursesAsync(
 PagedRequest request, CancellationToken ct)
 {

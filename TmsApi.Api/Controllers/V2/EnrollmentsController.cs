@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using TmsApi.Application.Enrollments.Commands;
 using TmsApi.Application.Enrollments.Queries;
 
+namespace TmsApi.Api.Controllers.V2; 
 [ApiController]
 [Route("api/v{version:apiVersion}/enrollments")]
 [ApiVersion("2.0")]

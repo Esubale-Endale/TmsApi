@@ -9,7 +9,7 @@ public class EnrollStudentHandler(IEnrollmentService enrollmentService, ICourseS
 {
 public async Task<Result<EnrollmentCreated, EnrollmentError>> Handle(EnrollStudentCommand command, CancellationToken ct)
     {
-        var course = await courseService.GetByCodeAsync(command.CourseCode, ct);
+        var course = await courseService.GetCourseEntityByCodeAsync(command.CourseCode, ct);
 
         if (course is null)
             return Result<EnrollmentCreated, EnrollmentError>.Failure(   EnrollmentError.CourseNotFound(command.CourseCode));
@@ -18,7 +18,7 @@ public async Task<Result<EnrollmentCreated, EnrollmentError>> Handle(EnrollStude
             return Result<EnrollmentCreated, EnrollmentError>.Failure(        EnrollmentError.CourseFull(course.Title, course.MaxCapacity));
         
         if (await enrollmentService.ExistsAsync(command.StudentId, command.CourseCode, ct))
-            return Result<EnrollmentCreated, EnrollmentError>.Failure( EnrollmentError.AlreadyEnrolled(command.StudentId, command.CourseCode));
+            return Result<EnrollmentCreated, EnrollmentError>.Failure( EnrollmentError.AlreadyEnrolled(command.CourseCode, command.StudentId));
         
         var enrollment = new Enrollment
         {
