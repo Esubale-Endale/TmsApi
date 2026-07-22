@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using TmsApi.Infrastructure.Persistence;
 
@@ -9,19 +10,19 @@ namespace TmsApi.Api.Controllers.V2;
 [ApiExplorerSettings(GroupName = "v2")]
 [Route("api/V{version:apiVersion}/courses")]
 [ApiVersion("2.0")]
-public class CourseController(TmsDbContext context): ControllerBase
+public class CourseController(TmsDbContext context) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetCourses([FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
     {
-        page = Math.Max(1,page);
-        pageSize = Math.Clamp(pageSize, 1 , 50);
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 50);
 
         var baseQuery = context.Courses.AsNoTracking();
-        var totalCount = await baseQuery.CountAsync();
+        var totalCount = await baseQuery.CountAsync(cancellationToken: ct);
         var rows = await baseQuery
             .OrderBy(c => c.Title)
-            .Skip((page - 1 ) * pageSize)
+            .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(c => new
             {
@@ -52,10 +53,19 @@ public class CourseController(TmsDbContext context): ControllerBase
             links = new
             {
                 self = $"/api/v2/courses?page={page}&pageSize={pageSize}",
-                next = hasNext ?  $"/api/v2/courses?page={page + 1}&pageSize={pageSize}" : (string?)null,
-                prev = hasPrevious ? $"/api/v2/courses?page={page - 1}&pageSize={pageSize}":(string?)null,
+                next = hasNext ? $"/api/v2/courses?page={page + 1}&pageSize={pageSize}" : (string?)null,
+                prev = hasPrevious ? $"/api/v2/courses?page={page - 1}&pageSize={pageSize}" : (string?)null,
                 enroll = "/api/v2/enrollments"
             }
         });
     }
+
+    // [HttpGet("search")]
+    // [EnableRateLimiting("search")]
+    // public async Task<IActionResult> SearchCourses(
+    // [FromQuery] string? term, CancellationToken ct)
+    // {
+    //     var results = await mediator.Send(new SearchCoursesQuery(term), ct);
+    //     return Ok(results);
+    // }
 }
