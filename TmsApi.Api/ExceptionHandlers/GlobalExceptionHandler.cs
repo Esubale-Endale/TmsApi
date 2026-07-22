@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using TmsApi.Application.Common.Exceptions;
 
 namespace TmsApi.Api.ExceptionHandlers;
 
@@ -24,7 +25,10 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
                             .ToArray()
                     )
             ),
-            _ => (StatusCodes.Status500InternalServerError, "Server error",
+
+            _ => (
+                StatusCodes.Status500InternalServerError,
+                "Server error",
                 $"An unexpected error occurred. Trace ID: {httpContext.TraceIdentifier}", null)
         };
 

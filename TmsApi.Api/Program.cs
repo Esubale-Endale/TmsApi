@@ -14,6 +14,7 @@ using TmsApi.Application.Behaviors;
 using TmsApi.Application.Interfaces;
 using TmsApi.Infrastructure.Services;
 using TmsApi.Application.Enrollments.Commands;
+using TmsApi.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -76,6 +77,7 @@ builder.Services.AddApiVersioning(options =>
     options.SubstituteApiVersionInUrl = true;
 });
 builder.Services.AddScoped<ICachedCourseService, CachedCourseService>();
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 var app = builder.Build();
 
 app.UseMiddleware<RequestLoggingMiddleware>();

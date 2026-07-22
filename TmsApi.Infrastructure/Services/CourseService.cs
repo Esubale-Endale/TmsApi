@@ -1,25 +1,62 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TmsApi.Application.Courses.Command;
-using TmsApi.Infrastructure.Persistence;
 using TmsApi.Domain.Entities;
 using TmsApi.Application.DTOs;
 using TmsApi.Application.Interfaces;
 
 namespace TmsApi.Infrastructure.Services;
 
-public class CourseService : ICourseService
+public class CourseService(ICourseRepository repository, ILogger<CourseService> logger) : ICourseService
 {
-    private readonly TmsDbContext _db;
-    private readonly ILogger<CourseService> _logger;
-
-    public CourseService(TmsDbContext db, ILogger<CourseService> logger)
+    public Task<bool> CodeExistsAsync(string code, CancellationToken ct)
     {
-        _db = db;
-        _logger = logger;
+        return repository.CodeExistsAsync(code, ct);
     }
-    public Task<bool> CodeExistsAsync(string Code, CancellationToken ct)=> _db.Courses.AsNoTracking().AnyAsync(c => c.Code == Code, ct);
-    public async Task<CourseResponseDto> CreateAsync(CreateCourseRequest request, CancellationToken ct)
+
+    public async Task<CourseResponseDto?> GetByIdAsync(int id, CancellationToken ct)
+    {
+        var course = await repository.GetByIdAsync(id, ct);
+
+        if (course is null)
+            return null;
+
+        return new CourseResponseDto(
+            course.Id,
+            course.Code,
+            course.Title,
+            course.MaxCapacity,
+            course.Enrollments.Count);
+    }
+
+    public async Task<CourseResponseDto?> GetByCodeAsync(string code, CancellationToken ct)
+    {
+        var course = await repository.GetByCodeAsync(code, ct);
+
+        if (course is null)
+            return null;
+
+        return new CourseResponseDto(
+            course.Id,
+            course.Code,
+            course.Title,
+            course.MaxCapacity,
+            course.Enrollments.Count
+        );
+    }
+
+    public Task<PagedResponse<CourseResponseDto>> GetCoursesAsync(
+    PagedRequest request,
+    CancellationToken ct)
+    {
+        return repository.GetCoursesAsync(request, ct);
+    }
+    public Task<Course?> GetCourseEntityByCodeAsync(string code, CancellationToken ct)
+    {
+        return repository.GetByCodeAsync(code, ct);
+    }
+    public async Task<CourseResponseDto> CreateAsync(
+     CreateCourseRequest request,
+     CancellationToken ct)
     {
         var course = new Course
         {
@@ -28,11 +65,9 @@ public class CourseService : ICourseService
             MaxCapacity = request.MaxCapacity
         };
 
-        _db.Courses.Add(course);
+        await repository.AddAsync(course, ct);
 
-        await _db.SaveChangesAsync(ct);
-
-        _logger.LogInformation(
+        logger.LogInformation(
             "Created course {CourseId} ({Code})",
             course.Id,
             course.Code);
@@ -42,164 +77,48 @@ public class CourseService : ICourseService
             course.Code,
             course.Title,
             course.MaxCapacity,
-            course.Enrollments.Count
-        )
-        ;
+            course.Enrollments.Count);
     }
-    public async Task<CourseResponseDto?> GetByIdAsync(int id, CancellationToken ct)
+    public async Task<bool> DeleteAsync(
+       int id,
+       CancellationToken ct)
     {
-        return await _db.Courses
-            .AsNoTracking()
-            .Where(c => c.Id == id)
-            .Select(c => new CourseResponseDto(
-                c.Id,
-                c.Code,
-                c.Title,
-                c.MaxCapacity,
-                c.Enrollments.Count
-            ))
-            .FirstOrDefaultAsync(ct);
-    }
-    public async Task<CourseResponseDto?> GetByCodeAsync(string code, CancellationToken ct)
-    {
-        return await _db.Courses
-            .AsNoTracking()
-            .Where(c => c.Code == code)
-            .Select(c => new CourseResponseDto(
-                c.Id,
-                c.Code,
-                c.Title,
-                c.MaxCapacity,
-                c.Enrollments.Count
-            ))
-            .FirstOrDefaultAsync(ct);
-    }
-    public async Task<Course?> GetCourseEntityByCodeAsync(
-    string code,
-    CancellationToken ct)
-{
-    return await _db.Courses
-        .Include(c => c.Enrollments)
-        .FirstOrDefaultAsync(c => c.Code == code, ct);
-}
-    public async Task<PagedResponse<CourseResponseDto>> GetCoursesAsync(
-    PagedRequest request, CancellationToken ct)
-{
-   
-    IQueryable<Course> query = _db.Courses.AsNoTracking();
-    if(!string.IsNullOrWhiteSpace(request.Search))
-    {
-        query = query.Where(c => 
-            EF.Functions.ILike(c.Title, $"%{request.Search}%") ||
-            EF.Functions.ILike(c.Code, $"%{request.Search}%"));
-    }
-
-    var totalCount = await query.CountAsync(ct);
-
-  IQueryable<Course> sortedQuery = request.OrderBy switch
-    {
-        "Code" => request.Descending
-            ? query.OrderByDescending(c => c.Code)
-            : query.OrderBy(c => c.Code),
-
-        "MaxCapacity" => request.Descending
-            ? query.OrderByDescending(c => c.MaxCapacity)
-            : query.OrderBy(c => c.MaxCapacity),
-
-        _ => request.Descending
-            ? query.OrderByDescending(c => c.Title)
-            : query.OrderBy(c => c.Title),
-    };
-
-    var items = await sortedQuery
-        .Skip((request.Page- 1) * request.PageSize)
-        .Take(request.PageSize)
-        .Select(c => new CourseResponseDto(
-            c.Id,
-            c.Code,
-            c.Title,
-            c.MaxCapacity,
-            c.Enrollments.Count
-            ))
-        .ToListAsync(ct);
-  
-        return new PagedResponse<CourseResponseDto> {
-                Items = items,
-                TotalCount = totalCount,
-                Page = request.Page,
-                PageSize = request.PageSize
-            }; 
-}
-    public async Task<bool> DeleteAsync(int id, CancellationToken ct)
-
-    {
-        var course = await _db.Courses
-            .FirstOrDefaultAsync(c => c.Id == id, ct);
+        var course = await repository.GetByIdAsync(id, ct);
 
         if (course is null)
         {
-            _logger.LogWarning(
+            logger.LogWarning(
                 "Delete failed. Course {CourseId} not found",
                 id);
 
             return false;
         }
 
-        _db.Courses.Remove(course);
+        await repository.DeleteAsync(course, ct);
 
-        await _db.SaveChangesAsync();
-
-        _logger.LogInformation(
+        logger.LogInformation(
             "Deleted course {CourseId}",
             id);
 
         return true;
     }
-    public async Task<IEnumerable<CourseResponseDto>> GetCourseEnrollments(int courseId, CancellationToken ct)
-    {
-        var course = await _db.Courses
-            .AsNoTracking()
-            .Where(c => c.Id == courseId)
-            .Select(c => new CourseResponseDto(
-                c.Id,
-                c.Code,
-                c.Title,
-                c.MaxCapacity,
-                c.Enrollments.Count
-            ))
-            .FirstOrDefaultAsync(ct);
-
-        if (course is null)
-        {
-            _logger.LogWarning(
-                "GetCourseEnrollments failed. Course {CourseId} not found",
-                courseId);
-
-            return Enumerable.Empty<CourseResponseDto>();
-        }
-
-        return new List<CourseResponseDto> { course };
-    }
     public async Task UpdateAsync(UpdateCourseCommand command, CancellationToken ct)
     {
-        var course = await _db.Courses
-            .FirstOrDefaultAsync(c => c.Id == command.Id, ct);
+        var course = await repository.GetByIdAsync(command.Id, ct);
+
 
         if (course is null)
         {
-            _logger.LogWarning(
+            logger.LogWarning(
                 "Update failed. Course {CourseId} not found",
                 command.Id);
 
             throw new InvalidOperationException($"Course with ID {command.Id} not found.");
         }
 
-        course.Title = command.Title;
-        course.MaxCapacity = command.MaxCapacity;
+        await repository.UpdateAsync(course, ct); ;
 
-        await _db.SaveChangesAsync(ct);
-
-        _logger.LogInformation(
+        logger.LogInformation(
             "Updated course {CourseId}",
             command.Id);
     }
