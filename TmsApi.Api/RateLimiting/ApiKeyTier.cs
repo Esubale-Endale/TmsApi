@@ -10,7 +10,7 @@ public static class ApiKeyResolver
         ["tms-paid-001"] = ApiKeyTier.Paid
     };
 
-    public static (string PartitionKey, ApiKeyTier Tier) Resolve(Microsoft.AspNetCore.Http.HttpContext ctx)
+    public static (string PartitionKey, ApiKeyTier Tier) Resolve(HttpContext ctx)
     {
         var key = ctx.Request.Headers["X-ApiKey-Tier"].ToString();
         if (string.IsNullOrEmpty(key))
