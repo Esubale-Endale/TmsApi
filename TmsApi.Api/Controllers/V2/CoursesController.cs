@@ -1,6 +1,5 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using TmsApi.Infrastructure.Persistence;
 
@@ -53,8 +52,8 @@ public class CourseController(TmsDbContext context) : ControllerBase
             links = new
             {
                 self = $"/api/v2/courses?page={page}&pageSize={pageSize}",
-                next = hasNext ? $"/api/v2/courses?page={page + 1}&pageSize={pageSize}" : (string?)null,
-                prev = hasPrevious ? $"/api/v2/courses?page={page - 1}&pageSize={pageSize}" : (string?)null,
+                next = hasNext ? $"/api/v2/courses?page={page + 1}&pageSize={pageSize}" : null,
+                prev = hasPrevious ? $"/api/v2/courses?page={page - 1}&pageSize={pageSize}" : null,
                 enroll = "/api/v2/enrollments"
             }
         });
