@@ -35,8 +35,15 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<AuditLogFilter>();
 });
 builder.Services.AddProblemDetails();
-builder.Services.AddOpenApi("v1");
-builder.Services.AddOpenApi("v2");
+builder.Services.AddOpenApi("v1", options =>
+{
+    options.ShouldInclude = description => description.GroupName == "v1";
+});
+builder.Services.AddOpenApi("v2", options =>
+{
+    options.ShouldInclude = description => description.GroupName == "v2";
+}
+);
 builder.Services.AddDbContext<TmsDbContext>(options =>
         options.UseNpgsql(builder.Configuration.GetConnectionString("TmsDatabase"))
                 .LogTo(Console.WriteLine, LogLevel.Information)
@@ -139,7 +146,7 @@ builder.Services.AddRateLimiter(options =>
             Type = "https://tms.local/errors/rate_limit_exceeded"
         }, ct);
     };
-    options.AddConcurrencyLimiter("transcript", opt =>
+    options.AddConcurrencyLimiter("transcripts", opt =>
 
     {
         opt.PermitLimit = 5;
@@ -178,11 +185,14 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference(options =>
     {
+        options.WithTitle("TMS API Reference")
+            .WithTheme(ScalarTheme.DeepSpace)
+            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+        // Tell Scalar to pull both documents into its sidebar dropdown
         options
-            .AddDocument("v1")
-            .AddDocument("v2");
+            .AddDocument("v1", "API Version 1.0")
+            .AddDocument("v2", "API Version 2.0");
     });
-    // Seed the database with initial data
     using var scope = app.Services.CreateScope();
     var context = scope.ServiceProvider.GetRequiredService<TmsDbContext>();
     await DataSeeder.SeedCourseAsync(context);
