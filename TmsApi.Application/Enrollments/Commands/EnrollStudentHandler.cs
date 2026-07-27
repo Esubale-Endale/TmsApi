@@ -7,19 +7,19 @@ namespace TmsApi.Application.Enrollments.Commands;
 
 public class EnrollStudentHandler(IEnrollmentService enrollmentService, ICourseService courseService) : IRequestHandler<EnrollStudentCommand, Result<EnrollmentCreated, EnrollmentError>>
 {
-public async Task<Result<EnrollmentCreated, EnrollmentError>> Handle(EnrollStudentCommand command, CancellationToken ct)
+    public async Task<Result<EnrollmentCreated, EnrollmentError>> Handle(EnrollStudentCommand command, CancellationToken ct)
     {
         var course = await courseService.GetCourseEntityByCodeAsync(command.CourseCode, ct);
 
         if (course is null)
-            return Result<EnrollmentCreated, EnrollmentError>.Failure(   EnrollmentError.CourseNotFound(command.CourseCode));
+            return Result<EnrollmentCreated, EnrollmentError>.Failure(EnrollmentError.CourseNotFound(command.CourseCode));
 
         if (course.Enrollments.Count >= course.MaxCapacity)
-            return Result<EnrollmentCreated, EnrollmentError>.Failure(        EnrollmentError.CourseFull(course.Title, course.MaxCapacity));
-        
+            return Result<EnrollmentCreated, EnrollmentError>.Failure(EnrollmentError.CourseFull(course.Title, course.MaxCapacity));
+
         if (await enrollmentService.ExistsAsync(command.StudentId, command.CourseCode, ct))
-            return Result<EnrollmentCreated, EnrollmentError>.Failure( EnrollmentError.AlreadyEnrolled(command.CourseCode, command.StudentId));
-        
+            return Result<EnrollmentCreated, EnrollmentError>.Failure(EnrollmentError.AlreadyEnrolled(command.CourseCode, command.StudentId));
+
         var enrollment = new Enrollment
         {
             StudentId = command.StudentId,
