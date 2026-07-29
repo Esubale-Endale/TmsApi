@@ -22,8 +22,13 @@ using TmsApi.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// builder.WebHost.UseUrls("http://localhost:5000", "https://localhost:7003");
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular", policy =>
+    policy.WithOrigins("http://localhost:4200")
+    .AllowAnyHeader()
+    .AllowAnyMethod());
+});
 builder.Services.AddAuthentication("Training").AddScheme<AuthenticationSchemeOptions, TrainingAuthHandler>("Training", null);
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<IStudentService, StudentService>();
@@ -89,6 +94,7 @@ builder.Services.AddApiVersioning(options =>
 });
 builder.Services.AddScoped<ICachedCourseService, CachedCourseService>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddRateLimiter(options =>
 {
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
@@ -168,6 +174,7 @@ var app = builder.Build();
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseMiddleware<V1DeprecationMiddleware>();
 app.UseHttpsRedirection();
+app.UseCors("AllowAngular");
 app.UseExceptionHandler();
 app.UseRouting();
 app.UseRateLimiter();

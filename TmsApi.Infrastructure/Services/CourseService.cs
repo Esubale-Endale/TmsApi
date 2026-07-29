@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using TmsApi.Application.Courses.Command;
+using TmsApi.Application.Courses.Commands;
 using TmsApi.Domain.Entities;
 using TmsApi.Application.DTOs;
 using TmsApi.Application.Interfaces;

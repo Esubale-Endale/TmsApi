@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace TmsApi.Application.Courses.Command;
+namespace TmsApi.Application.Courses.Commands;
 public class UpdateCourseCommand : IRequest<bool>
 {
     public int Id { get; set; }

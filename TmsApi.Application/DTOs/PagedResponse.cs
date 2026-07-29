@@ -9,4 +9,9 @@ public record PagedResponse<T>
     public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
     public bool HasPrevious => Page > 1;
     public bool HasNext => Page < TotalPages;
+
+    public object Select(Func<object, StudentResponseDto> func)
+    {
+        throw new NotImplementedException();
+    }
 }
