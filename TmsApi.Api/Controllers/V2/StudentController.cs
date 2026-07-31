@@ -1,6 +1,7 @@
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using TmsApi.Application.Students.Commands.CreateStudent;
 using TmsApi.Application.Students.Queries.GetStudents;
 
 namespace TmsApi.Api.Controllers.V2;
@@ -21,5 +22,12 @@ public class StudentController(IMediator mediator) : ControllerBase
             cancellationToken);
 
         return Ok(students);
+    }
+    [HttpPost]
+    public async Task<IActionResult> Create(CreateStudentCommand command, CancellationToken ct)
+    {
+        await mediator.Send(command, ct);
+
+        return Ok();
     }
 }

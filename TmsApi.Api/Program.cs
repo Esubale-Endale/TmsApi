@@ -16,6 +16,7 @@ using TmsApi.Api.RateLimiting;
 using TmsApi.Application.Behaviors;
 using TmsApi.Application.Enrollments.Commands;
 using TmsApi.Application.Interfaces;
+using TmsApi.Application.Students.Commands.CreateStudent;
 using TmsApi.Infrastructure.Persistence;
 using TmsApi.Infrastructure.Repositories;
 using TmsApi.Infrastructure.Services;
@@ -168,7 +169,7 @@ builder.Services.AddRateLimiter(options =>
     });
 });
 builder.Services.AddHealthChecks();
-
+builder.Services.AddValidatorsFromAssemblyContaining<CreateStudentValidator>();
 var app = builder.Build();
 
 app.UseMiddleware<RequestLoggingMiddleware>();

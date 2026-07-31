@@ -4,7 +4,7 @@ using TmsApi.Application.Interfaces;
 
 namespace TmsApi.Application.Students.Queries.GetStudentById;
 
-public class GetStudentById(IStudentRepository repository) : IRequestHandler<GetStudentByIdQuery, StudentResponseDto>
+public class GetStudentById(IStudentRepository repository) : IRequestHandler<GetStudentByIdQuery, StudentResponseDto?>
 {
     public async Task<StudentResponseDto?> Handle(GetStudentByIdQuery request, CancellationToken ct)
     {

@@ -21,18 +21,18 @@ public class StudentRepository(TmsDbContext context) : IStudentRepository
     public async Task AddAsync(Student student, CancellationToken ct)
     {
         await context.Students.AddAsync(student, ct);
-
-        await context.SaveChangesAsync(
-            ct);
+        await context.SaveChangesAsync(ct);
     }
 
-    public Task UpdateAsync(Student student, CancellationToken ct)
+    public async Task UpdateAsync(Student student, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        context.Students.Update(student);
+        await context.SaveChangesAsync(ct);
     }
 
-    public Task DeleteAsync(Student student, CancellationToken ct)
+    public async Task DeleteAsync(Student student, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        context.Students.Remove(student);
+        await context.SaveChangesAsync(ct);
     }
 }
