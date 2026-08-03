@@ -26,7 +26,7 @@ public class EnrollmentsController(IMediator mediator) : ControllerBase
                 {
                     "course_not_found" => StatusCodes.Status404NotFound,
                     "course_full" or "already_enrolled" => StatusCodes.Status409Conflict,
-                    _ => StatusCodes.Status400BadRequest
+                    _ => StatusCodes.Status400BadRequest 
                 };
                 return Problem(
                     statusCode: status,
