@@ -1,5 +1,6 @@
 using MediatR;
 using TmsApi.Application.Interfaces;
+using TmsApi.Domain.Enums;
 namespace TmsApi.Application.Enrollments.Queries;
 
 public class GetStudentScheduleHandler(IEnrollmentService repo)
@@ -14,7 +15,10 @@ public class GetStudentScheduleHandler(IEnrollmentService repo)
             .Select(e => new ScheduleItemDto(
                 e.Course.Code,
                 e.Course.Title,
-                "TBD"))
+                "TBD",
+                e.Status
+                )
+            )
             .ToList();
         return new ScheduleDto(query.StudentId, items);
     }

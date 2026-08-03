@@ -21,8 +21,14 @@ public class EnrollmentService : IEnrollmentService
         _db.Enrollments
             .AsNoTracking()
             .Where(e => e.Id == id && e.CourseId == courseId)
-            .Select(e => new EnrollmentResponseDto(e.Id, e.CourseId, e.
-            StudentId, e.EnrolledAt))
+            .Select(e => new EnrollmentResponseDto(
+                e.Id,
+                e.CourseId,
+                e.StudentId,
+                e.Status,
+                e.EnrolledAt
+                )
+            )
             .FirstOrDefaultAsync(ct);
 
     public async Task<IReadOnlyList<EnrollmentResponseDto>> GetByCourseAsync(int courseId, CancellationToken ct)
@@ -34,7 +40,10 @@ public class EnrollmentService : IEnrollmentService
                 e.Id,
                 e.StudentId,
                 e.CourseId,
-                e.EnrolledAt))
+                e.Status,
+                e.EnrolledAt
+                )
+            )
             .ToListAsync(ct);
     }
     public async Task<EnrollmentResponseDto> CreateAsync(int courseId, EnrollStudentRequest request, CancellationToken ct)
