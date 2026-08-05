@@ -28,8 +28,7 @@ public class EnrollmentService : IEnrollmentService
                 e.Status,
                 e.EnrolledAt
                 )
-            )
-            .FirstOrDefaultAsync(ct);
+            ).FirstOrDefaultAsync(ct);
 
     public async Task<IReadOnlyList<EnrollmentResponseDto>> GetByCourseAsync(int courseId, CancellationToken ct)
     {

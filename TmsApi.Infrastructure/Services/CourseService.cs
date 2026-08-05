@@ -79,9 +79,7 @@ public class CourseService(ICourseRepository repository, ILogger<CourseService> 
             course.MaxCapacity,
             course.Enrollments.Count);
     }
-    public async Task<bool> DeleteAsync(
-       int id,
-       CancellationToken ct)
+    public async Task<bool> DeleteAsync(int id, CancellationToken ct)
     {
         var course = await repository.GetByIdAsync(id, ct);
 
