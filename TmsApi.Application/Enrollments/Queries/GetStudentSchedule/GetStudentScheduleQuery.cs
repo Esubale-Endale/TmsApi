@@ -1,7 +1,7 @@
 using MediatR;
 using TmsApi.Domain.Enums;
 
-namespace TmsApi.Application.Enrollments.Queries;
+namespace TmsApi.Application.Enrollments.Queries.GetStudentSchedule;
 
 public record GetStudentScheduleQuery(int StudentId) : IRequest<ScheduleDto>;
 public record ScheduleDto(int StudentId, List<ScheduleItemDto> Courses);

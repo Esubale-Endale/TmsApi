@@ -114,17 +114,13 @@ public class EnrollmentService : IEnrollmentService
                 e.Course.Code == courseCode,
                 ct);
     }
-    public async Task AddAsync(
-    Enrollment enrollment,
-    CancellationToken ct)
+    public async Task AddAsync(Enrollment enrollment, CancellationToken ct)
     {
         _db.Enrollments.Add(enrollment);
 
         await _db.SaveChangesAsync(ct);
     }
-    public async Task<List<Enrollment>> GetByStudentIdAsync(
-        int studentId,
-        CancellationToken ct)
+    public async Task<List<Enrollment>> GetByStudentIdAsync(int studentId, CancellationToken ct)
     {
         return await _db.Enrollments
             .Include(e => e.Course)

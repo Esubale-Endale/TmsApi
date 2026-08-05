@@ -14,7 +14,7 @@ using TmsApi.Api.Middleware;
 using TmsApi.Api.Options;
 using TmsApi.Api.RateLimiting;
 using TmsApi.Application.Behaviors;
-using TmsApi.Application.Enrollments.Commands;
+using TmsApi.Application.Enrollments.Commands.EnrollStudent;
 using TmsApi.Application.Interfaces;
 using TmsApi.Application.Students.Commands.CreateStudent;
 using TmsApi.Infrastructure.Persistence;
@@ -48,8 +48,7 @@ builder.Services.AddOpenApi("v1", options =>
 builder.Services.AddOpenApi("v2", options =>
 {
     options.ShouldInclude = description => description.GroupName == "v2";
-}
-);
+});
 builder.Services.AddDbContext<TmsDbContext>(options =>
         options.UseNpgsql(builder.Configuration.GetConnectionString("TmsDatabase"))
                 .LogTo(Console.WriteLine, LogLevel.Information)
@@ -96,6 +95,7 @@ builder.Services.AddApiVersioning(options =>
 builder.Services.AddScoped<ICachedCourseService, CachedCourseService>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 builder.Services.AddRateLimiter(options =>
 {
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>

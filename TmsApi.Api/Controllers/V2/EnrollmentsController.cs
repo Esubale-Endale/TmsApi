@@ -1,8 +1,11 @@
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using TmsApi.Application.Enrollments.Commands;
-using TmsApi.Application.Enrollments.Queries;
+using TmsApi.Application.Enrollments.Commands.ApproveEnrollment;
+using TmsApi.Application.Enrollments.Commands.EnrollStudent;
+using TmsApi.Application.Enrollments.Queries.GetEnrollmentById;
+using TmsApi.Application.Enrollments.Queries.GetEnrollments;
+using TmsApi.Application.Enrollments.Queries.GetStudentSchedule;
 
 namespace TmsApi.Api.Controllers.V2;
 
@@ -33,11 +36,34 @@ public class EnrollmentsController(IMediator mediator) : ControllerBase
             });
     }
 
-    [HttpGet("{studentId}/schedule")]
+    [HttpGet("{studentId:int}/schedule")]
     public async Task<IActionResult> GetSchedule(int studentId, CancellationToken ct)
     {
         var schedule = await mediator.Send(
         new GetStudentScheduleQuery(studentId), ct);
         return Ok(schedule);
+    }
+
+    [HttpPut("{id:int}/approve")]
+    public async Task<IActionResult> Approve(int id, CancellationToken ct)
+    {
+        await mediator.Send(new ApproveEnrollmentCommand(id), ct);
+
+        return NoContent();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll(CancellationToken ct)
+    {
+        var result = await mediator.Send(new GetEnrollmentsQuery(), ct);
+
+        return Ok(result);
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetById(int id, CancellationToken ct)
+    {
+        var result = await mediator.Send(new GetEnrollmentByIdQuery(id), ct);
+        return Ok(result);
     }
 }

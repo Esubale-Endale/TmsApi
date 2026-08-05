@@ -1,4 +1,3 @@
-using TmsApi.Domain.Entities;
 using TmsApi.Domain.Enums;
 
 namespace TmsApi.Application.DTOs;
