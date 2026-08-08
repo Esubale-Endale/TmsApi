@@ -1,4 +1,5 @@
 using System.Threading.RateLimiting;
+using System.Threading.Channels;
 using Asp.Versioning;
 using FluentValidation;
 using MediatR;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Caching.Hybrid;
 using Scalar.AspNetCore;
 using TmsApi.Api.ExceptionHandlers;
 using TmsApi.Api.Filters;
+using TmsApi.Api.Hubs;
 using TmsApi.Api.Middleware;
 using TmsApi.Api.Options;
 using TmsApi.Api.RateLimiting;
@@ -17,9 +19,12 @@ using TmsApi.Application.Behaviors;
 using TmsApi.Application.Enrollments.Commands.EnrollStudent;
 using TmsApi.Application.Interfaces;
 using TmsApi.Application.Students.Commands.CreateStudent;
+using TmsApi.Application.Transcripts;
 using TmsApi.Infrastructure.Persistence;
 using TmsApi.Infrastructure.Repositories;
 using TmsApi.Infrastructure.Services;
+using TmsApi.Infrastructure.Transcripts;
+using TmsApi.Infrastructure.Workers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -92,10 +97,16 @@ builder.Services.AddApiVersioning(options =>
     options.GroupNameFormat = "'v'VVV";
     options.SubstituteApiVersionInUrl = true;
 });
+builder.Services.AddSingleton<ITranscriptStatusStore, InMemoryTranscriptStatusStore>();
+builder.Services.AddSingleton(Channel.CreateBounded<TranscriptRequest>(new BoundedChannelOptions(100)
+{
+    FullMode = BoundedChannelFullMode.Wait
+}));
 builder.Services.AddScoped<ICachedCourseService, CachedCourseService>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
+builder.Services.AddHostedService<TranscriptWorker>();
 builder.Services.AddRateLimiter(options =>
 {
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
@@ -170,6 +181,8 @@ builder.Services.AddRateLimiter(options =>
 });
 builder.Services.AddHealthChecks();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateStudentValidator>();
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 
 app.UseMiddleware<RequestLoggingMiddleware>();
@@ -183,6 +196,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.UseStatusCodePages();
+app.MapHub<TmsHub>("/hubs/tms");
 
 app.MapHealthChecks("/health/live").DisableRateLimiting();
 app.MapHealthChecks("/health/ready").DisableRateLimiting();
