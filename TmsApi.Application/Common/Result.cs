@@ -7,11 +7,15 @@ public readonly record struct Result<TValue, TError>
     public bool IsSuccess { get; }
     private Result(TValue value)
     {
-        _value = value; _error = default; IsSuccess = true;
+        _value = value;
+        _error = default;
+        IsSuccess = true;
     }
     private Result(TError error)
     {
-        _value = default; _error = error; IsSuccess = false;
+        _value = default;
+        _error = error;
+        IsSuccess = false;
     }
     public static Result<TValue, TError> Success(TValue value) => new(value);
     public static Result<TValue, TError> Failure(TError error) => new(error);

@@ -1,4 +1,4 @@
-using TmsApi.Application.Courses.Command;
+using TmsApi.Application.Courses.Commands;
 using TmsApi.Application.DTOs;
 using TmsApi.Domain.Entities;
 
