@@ -25,6 +25,8 @@ using TmsApi.Infrastructure.Repositories;
 using TmsApi.Infrastructure.Services;
 using TmsApi.Infrastructure.Transcripts;
 using TmsApi.Infrastructure.Workers;
+using TmsApi.Api.Notifications;
+using TmsApi.Application.Notifications;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +35,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngular", policy =>
     policy.WithOrigins("http://localhost:4200")
     .AllowAnyHeader()
-    .AllowAnyMethod());
+    .AllowAnyMethod()
+    .AllowCredentials()
+    );
 });
 builder.Services.AddAuthentication("Training").AddScheme<AuthenticationSchemeOptions, TrainingAuthHandler>("Training", null);
 builder.Services.AddAuthorization();
@@ -99,9 +103,11 @@ builder.Services.AddApiVersioning(options =>
 });
 builder.Services.AddSingleton<ITranscriptStatusStore, InMemoryTranscriptStatusStore>();
 builder.Services.AddSingleton(Channel.CreateBounded<TranscriptRequest>(new BoundedChannelOptions(100)
+
 {
     FullMode = BoundedChannelFullMode.Wait
 }));
+builder.Services.AddSingleton<ITranscriptNotificationService, SignalRTranscriptNotificationService>();
 builder.Services.AddScoped<ICachedCourseService, CachedCourseService>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
@@ -179,9 +185,9 @@ builder.Services.AddRateLimiter(options =>
         opt.QueueLimit = 2;
     });
 });
-builder.Services.AddHealthChecks();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateStudentValidator>();
 builder.Services.AddSignalR();
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
