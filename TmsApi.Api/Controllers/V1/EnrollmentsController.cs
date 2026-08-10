@@ -1,11 +1,14 @@
+using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using TmsApi.Application.DTOs;
 using TmsApi.Application.Interfaces;
 
-namespace TmsApi.Api.Controllers;
+namespace TmsApi.Api.Controllers.V1;
 
 [ApiController]
-[Route("api/enrollments")]
+[ApiExplorerSettings(GroupName = "v1")]
+[Route("api/v{version:apiVersion}/enrollments")]
+[ApiVersion("1.0")]
 public class EnrollmentsController(ICourseService courseService, IEnrollmentService enrollmentService) : ControllerBase
 {
     [HttpGet(Name = "ListCourseEnrollments")]
@@ -15,9 +18,9 @@ public class EnrollmentsController(ICourseService courseService, IEnrollmentServ
     [EndpointSummary("List enrolments for a course")]
     public async Task<IActionResult> GetEnrollments(int courseId, CancellationToken ct)
     {
-        var course = await courseService.GetByIdAsync(courseId,ct);
-        if(course is null) return NotFound();
-        return Ok(await enrollmentService.GetByCourseAsync(courseId, ct));   
+        var course = await courseService.GetByIdAsync(courseId, ct);
+        if (course is null) return NotFound();
+        return Ok(await enrollmentService.GetByCourseAsync(courseId, ct));
     }
 
     [HttpGet("{id:int}", Name = nameof(GetEnrollment))]
@@ -29,7 +32,7 @@ public class EnrollmentsController(ICourseService courseService, IEnrollmentServ
         var enrollment = await enrollmentService.GetByIdAsync(courseId, id, ct);
         return enrollment is not null ? Ok(enrollment) : NotFound();
     }
-    
+
     [HttpPost]
     [ProducesResponseType(typeof(EnrollmentResponseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -64,10 +67,10 @@ public class EnrollmentsController(ICourseService courseService, IEnrollmentServ
                 courseId,
                 id = enrollment.Id
             },
-            enrollment); 
+            enrollment);
     }
-    
-    [HttpDelete("{id:int}",Name = "EleteEnrollment")]
+
+    [HttpDelete("{id:int}", Name = "EleteEnrollment")]
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await enrollmentService.DeleteAsync(id);

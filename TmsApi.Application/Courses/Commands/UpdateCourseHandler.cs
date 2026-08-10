@@ -1,11 +1,9 @@
 using MediatR;
 using TmsApi.Application.Interfaces;
 
-namespace TmsApi.Application.Courses.Command;
+namespace TmsApi.Application.Courses.Commands;
 
-public class UpdateCourseHandler(
-    ICourseService repo,
-    ICachedCourseService cachedService)
+public class UpdateCourseHandler(ICourseService repo, ICachedCourseService cachedService)
     : IRequestHandler<UpdateCourseCommand, bool>
 {
     public async Task<bool> Handle(UpdateCourseCommand command,

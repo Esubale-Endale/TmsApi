@@ -2,6 +2,7 @@ using TmsApi.Application.DTOs;
 using TmsApi.Domain.Entities;
 
 namespace TmsApi.Application.Interfaces;
+
 public interface IEnrollmentService
 {
     Task<EnrollmentResponseDto?> GetByIdAsync(
@@ -20,18 +21,22 @@ public interface IEnrollmentService
         int courseId,
         CancellationToken ct
         );
+
     Task<bool> ExistsAsync(
         int studentId,
         string courseCode,
-        CancellationToken ct);
+        CancellationToken ct
+        );
 
     Task AddAsync(
         Enrollment enrollment,
-        CancellationToken ct);
+        CancellationToken ct
+        );
 
     Task<List<Enrollment>> GetByStudentIdAsync(
         int studentId,
-        CancellationToken ct);
+        CancellationToken ct
+        );
     Task<IReadOnlyList<Enrollment>> GetAllAsync();
     Task<bool> DeleteAsync(int id);
     public Task ArchiveOldEnrollmentsAsync(DateTime cutoff, CancellationToken ct);
