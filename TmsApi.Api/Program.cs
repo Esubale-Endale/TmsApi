@@ -227,7 +227,7 @@ app.Use(async (context, next) =>
 });
 app.MapControllers();
 app.UseStatusCodePages();
-app.MapHub<TmsHub>("/hubs/tms");
+app.MapHub<TmsHub>("/hubs/tms").RequireCors("TmsClient");
 
 app.MapHealthChecks("/health/live").DisableRateLimiting();
 app.MapHealthChecks("/health/ready").DisableRateLimiting();
