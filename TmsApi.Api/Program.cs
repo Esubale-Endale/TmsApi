@@ -28,6 +28,8 @@ using TmsApi.Infrastructure.Workers;
 using TmsApi.Api.Notifications;
 using TmsApi.Application.Notifications;
 using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Identity;
+using TmsApi.Infrastructure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,6 +48,18 @@ builder.Services.AddCors(options =>
 });
 builder.Services.AddAuthentication("Training").AddScheme<AuthenticationSchemeOptions, TrainingAuthHandler>("Training", null);
 builder.Services.AddAuthorization();
+builder.Services.AddIdentityCore<TmsUser>(options =>
+{
+    options.Password.RequiredLength = 12;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireDigit = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+    options.Lockout.AllowedForNewUsers = true;
+})
+.AddRoles<IdentityRole>()
+.AddEntityFrameworkStores<TmsDbContext>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
