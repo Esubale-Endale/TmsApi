@@ -4,6 +4,7 @@ using Asp.Versioning;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,8 @@ using TmsApi.Api.Notifications;
 using TmsApi.Application.Notifications;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using TmsApi.Infrastructure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,7 +49,27 @@ builder.Services.AddCors(options =>
              .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
     });
 });
-builder.Services.AddAuthentication("Training").AddScheme<AuthenticationSchemeOptions, TrainingAuthHandler>("Training", null);
+builder.Services.AddScoped<TokenService>();
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? string.Empty))
+    };
+})
+.AddScheme<AuthenticationSchemeOptions, TrainingAuthHandler>("Training", null);
 builder.Services.AddAuthorization();
 builder.Services.AddIdentityCore<TmsUser>(options =>
 {

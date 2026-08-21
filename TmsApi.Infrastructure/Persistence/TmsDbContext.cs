@@ -12,9 +12,17 @@ public class TmsDbContext(DbContextOptions<TmsDbContext> options) : IdentityDbCo
     public DbSet<Enrollment> Enrollments => Set<Enrollment>();
     public DbSet<Assessment> Assessments => Set<Assessment>();
     public DbSet<Certificate> Certificates => Set<Certificate>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.HasKey(refreshToken => refreshToken.Id);
+            entity.HasIndex(refreshToken => refreshToken.Token).IsUnique();
+            entity.Property(refreshToken => refreshToken.Token).IsRequired();
+            entity.Property(refreshToken => refreshToken.UserId).IsRequired();
+        });
         modelBuilder.ApplyConfigurationsFromAssembly(
             typeof(TmsDbContext).Assembly);
     }
