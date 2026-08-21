@@ -33,6 +33,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TmsApi.Infrastructure.Identity;
+using Tms.Api.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,6 +85,10 @@ builder.Services.AddIdentityCore<TmsUser>(options =>
 })
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<TmsDbContext>();
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("CanEditCourse", policy =>
+        policy.Requirements.Add(new CourseInstructorRequirement()));
+builder.Services.AddSingleton<IAuthorizationHandler, CourseInstructorHandler>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
@@ -119,14 +125,16 @@ builder.Services.AddHybridCache((options) =>
         LocalCacheExpiration = TimeSpan.FromMinutes(2)
     };
 });
-// Production-only  leave commented in lab 
-// builder.Services.AddStackExchangeRedisCache(options => 
-// { 
-// options.Configuration =
-// builder.Configuration.GetConnectionString("Redis");   
-// options.InstanceName = "tms:";
-// builder.Services.AddHybridCache();
-// }); 
+/* 
+Production-only  leave commented in lab 
+ builder.Services.AddStackExchangeRedisCache(options => 
+ { 
+ options.Configuration =
+ builder.Configuration.GetConnectionString("Redis");   
+ options.InstanceName = "tms:";
+ builder.Services.AddHybridCache();
+ }); 
+*/
 builder.Host.UseDefaultServiceProvider(options =>
 {
     options.ValidateScopes = true;
@@ -145,7 +153,6 @@ builder.Services.AddApiVersioning(options =>
 });
 builder.Services.AddSingleton<ITranscriptStatusStore, InMemoryTranscriptStatusStore>();
 builder.Services.AddSingleton(Channel.CreateBounded<TranscriptRequest>(new BoundedChannelOptions(100)
-
 {
     FullMode = BoundedChannelFullMode.Wait
 }));
@@ -194,6 +201,13 @@ builder.Services.AddRateLimiter(options =>
                     AutoReplenishment = true
                 })
         };
+    });
+    options.AddFixedWindowLimiter("AuthLimiter", opt =>
+    {
+        opt.PermitLimit = 5;
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.QueueLimit = 0;
+        opt.AutoReplenishment = true;
     });
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     options.OnRejected = async (context, ct) =>
@@ -265,7 +279,14 @@ app.Use(async (context, next) =>
 app.MapControllers();
 app.UseStatusCodePages();
 app.MapHub<TmsHub>("/hubs/tms").RequireCors("TmsClient");
-
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Append("X-Frame-Options", "DENY");
+    context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+    context.Response.Headers.Append("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self''unsafe-inline'; ");
+    await next();
+});
 app.MapHealthChecks("/health/live").DisableRateLimiting();
 app.MapHealthChecks("/health/ready").DisableRateLimiting();
 
