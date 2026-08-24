@@ -4,11 +4,12 @@ using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using TmsApi.Domain.Entities;
 using TmsApi.Infrastructure.Identity;
 using TmsApi.Infrastructure.Persistence;
 using TmsApi.Infrastructure.Services;
-using Microsoft.AspNetCore.RateLimiting;
+using TmsApi.Application.DTOs;
 
 namespace TmsApi.Api.Controllers;
 
@@ -21,13 +22,6 @@ public class AuthController(
     TmsDbContext context,
     TokenService tokenService) : ControllerBase
 {
-    public record RegisterRequest(
-        string Email,
-        string Password,
-        string FirstName,
-        string LastName,
-        string Role);
-
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
