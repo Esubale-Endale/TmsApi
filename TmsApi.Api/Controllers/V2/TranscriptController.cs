@@ -1,5 +1,6 @@
 using System.Threading.Channels;
 using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using TmsApi.Application.Transcripts;
@@ -9,6 +10,7 @@ namespace TmsApi.Api.Controllers.V2;
 [ApiController]
 [Route("api/v2/transcripts")]
 [ApiVersion("2.0")]
+[Authorize]
 public class TranscriptsController(
 Channel<TranscriptRequest> channel,
 ITranscriptStatusStore statusStore) : ControllerBase

@@ -1,3 +1,5 @@
+using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TmsApi.Application.DTOs;
 using TmsApi.Application.Interfaces;
@@ -6,7 +8,8 @@ namespace TmsApi.Api.Controllers.V1;
 
 [ApiController]
 [Route("api/students")]
-
+[ApiVersion("1.0")]
+[Authorize]
 public class StudetnsController(IStudentService studentService) : ControllerBase
 {
     // GET/api/students returns all student records

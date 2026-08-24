@@ -1,4 +1,5 @@
 using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TmsApi.Application.DTOs;
 using TmsApi.Application.Interfaces;
@@ -9,6 +10,7 @@ namespace TmsApi.Api.Controllers.V1;
 [ApiExplorerSettings(GroupName = "v1")]
 [Route("api/v{version:apiVersion}/enrollments")]
 [ApiVersion("1.0")]
+[Authorize]
 public class EnrollmentsController(ICourseService courseService, IEnrollmentService enrollmentService) : ControllerBase
 {
     [HttpGet(Name = "ListCourseEnrollments")]

@@ -1,4 +1,5 @@
 using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TmsApi.Application.DTOs;
@@ -11,6 +12,7 @@ namespace TmsApi.Api.Controllers.V1;
 [ApiExplorerSettings(GroupName = "v1")]
 [Route("api/v{version:apiVersion}/courses")]
 [ApiVersion("1.0")]
+[Authorize]
 public class CoursesController(TmsDbContext context, ICourseService courseService, LinkGenerator linkGenerator) : ControllerBase
 {
     [HttpGet]

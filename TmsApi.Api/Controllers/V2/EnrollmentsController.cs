@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using TmsApi.Api.Hubs;
@@ -13,6 +14,7 @@ using TmsApi.Application.Hubs;
 namespace TmsApi.Api.Controllers.V2;
 
 [ApiController]
+[Authorize]
 [Route("api/v{version:apiVersion}/enrollments")]
 [ApiVersion("2.0")]
 public class EnrollmentsController(IMediator mediator, IHubContext<TmsHub, ITmsHubClient> hubContext) : ControllerBase

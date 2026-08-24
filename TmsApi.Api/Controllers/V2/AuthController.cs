@@ -14,7 +14,7 @@ using TmsApi.Application.DTOs;
 namespace TmsApi.Api.Controllers;
 
 [ApiController]
-[Route("api/{version:apiVersion}/auth")]
+[Route("api/v{version:apiVersion}/auth")]
 [ApiVersion("2.0")]
 public class AuthController(
     UserManager<TmsUser> userManager,

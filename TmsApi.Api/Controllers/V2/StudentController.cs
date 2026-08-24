@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TmsApi.Application.Students.Commands.CreateStudent;
 using TmsApi.Application.Students.Queries.GetStudentById;
@@ -9,8 +10,9 @@ namespace TmsApi.Api.Controllers.V2;
 
 [ApiController]
 [ApiExplorerSettings(GroupName = "v2")]
-[Route("api/V{version:apiVersion}/students")]
+[Route("api/v{version:apiVersion}/students")]
 [ApiVersion("2.0")]
+[Authorize]
 public class StudentController(IMediator mediator) : ControllerBase
 {
 
