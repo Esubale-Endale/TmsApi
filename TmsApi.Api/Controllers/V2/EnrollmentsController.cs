@@ -63,7 +63,6 @@ public class EnrollmentsController(IMediator mediator, IHubContext<TmsHub, ITmsH
     public async Task<IActionResult> GetAll(CancellationToken ct)
     {
         var result = await mediator.Send(new GetEnrollmentsQuery(), ct);
-
         return Ok(result);
     }
 

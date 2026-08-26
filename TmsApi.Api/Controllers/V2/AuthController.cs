@@ -16,11 +16,7 @@ namespace TmsApi.Api.Controllers;
 [ApiController]
 [Route("api/v{version:apiVersion}/auth")]
 [ApiVersion("2.0")]
-public class AuthController(
-    UserManager<TmsUser> userManager,
-    RoleManager<IdentityRole> roleManager,
-    TmsDbContext context,
-    TokenService tokenService) : ControllerBase
+public class AuthController(UserManager<TmsUser> userManager, RoleManager<IdentityRole> roleManager, TmsDbContext context, TokenService tokenService) : ControllerBase
 {
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterRequest request)
@@ -53,18 +49,9 @@ public class AuthController(
     public async Task<IActionResult> Login(LoginRequest request)
     {
         var user = await userManager.FindByEmailAsync(request.Email);
-        if (user is null)
-        {
-            return Unauthorized(new { detail = "Invalid credentials." });
-        }
 
-        if (await userManager.IsLockedOutAsync(user))
-        {
-            return StatusCode(StatusCodes.Status423Locked, new
-            {
-                detail = "Account locked due to multiple failed login attempts. Try again in 15 minutes."
-            });
-        }
+        if (user is null) return Unauthorized(new { detail = "Invalid credentials." });
+        if (await userManager.IsLockedOutAsync(user)) return StatusCode(StatusCodes.Status423Locked, new { detail = "Account locked due to multiple failed login attempts. Try again in 15 minutes." });
 
         if (!await userManager.CheckPasswordAsync(user, request.Password))
         {
@@ -76,7 +63,16 @@ public class AuthController(
         var roles = await userManager.GetRolesAsync(user);
         var refreshToken = CreateRefreshToken(user.Id);
         context.RefreshTokens.Add(refreshToken);
+
         await context.SaveChangesAsync();
+
+        Response.Cookies.Append("refreshToken", refreshToken.Token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = refreshToken.ExpiresAt
+        });
 
         return Ok(new
         {
@@ -93,10 +89,7 @@ public class AuthController(
         var storedToken = await context.RefreshTokens
             .SingleOrDefaultAsync(refreshToken => refreshToken.Token == request.RefreshToken);
 
-        if (storedToken is null)
-        {
-            return Unauthorized(new { detail = "Invalid refresh token." });
-        }
+        if (storedToken is null) return Unauthorized(new { detail = "Invalid refresh token." });
 
         if (storedToken.IsUsed)
         {
@@ -113,21 +106,23 @@ public class AuthController(
             return Unauthorized(new { detail = "Token theft detected. All user sessions revoked." });
         }
 
-        if (storedToken.IsRevoked || storedToken.ExpiresAt <= DateTime.UtcNow)
-        {
-            return Unauthorized(new { detail = "Refresh token expired or revoked." });
-        }
+        if (storedToken.IsRevoked || storedToken.ExpiresAt <= DateTime.UtcNow) return Unauthorized(new { detail = "Refresh token expired or revoked." });
 
         var user = await userManager.FindByIdAsync(storedToken.UserId);
-        if (user is null)
-        {
-            return Unauthorized(new { detail = "Invalid refresh token." });
-        }
+        if (user is null) return Unauthorized(new { detail = "Invalid refresh token." });
 
         storedToken.IsUsed = true;
         var newRefreshToken = CreateRefreshToken(user.Id);
         context.RefreshTokens.Add(newRefreshToken);
         await context.SaveChangesAsync();
+
+        Response.Cookies.Append("refreshToken", newRefreshToken.Token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = newRefreshToken.ExpiresAt
+        });
 
         var roles = await userManager.GetRolesAsync(user);
         return Ok(new
@@ -141,12 +136,9 @@ public class AuthController(
     [Microsoft.AspNetCore.Authorization.Authorize]
     public async Task<IActionResult> GetCurrentUser()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? User.FindFirstValue("sub");
-        if (userId is null)
-        {
-            return Unauthorized(new { detail = "Session expired or missing bearer token." });
-        }
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+
+        if (userId is null) return Unauthorized(new { detail = "Session expired or missing bearer token." });
 
         var user = await userManager.FindByIdAsync(userId);
         return user is null
