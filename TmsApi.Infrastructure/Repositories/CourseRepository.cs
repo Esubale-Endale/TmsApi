@@ -72,18 +72,14 @@ public class CourseRepository(TmsDbContext db) : ICourseRepository
             .ToListAsync(ct);
     }
 
-    public async Task<Course?> GetByIdAsync(
-        int id,
-        CancellationToken ct)
+    public async Task<Course?> GetByIdAsync(int id, CancellationToken ct)
     {
         return await db.Courses
             .Include(c => c.Enrollments)
             .FirstOrDefaultAsync(c => c.Id == id, ct);
     }
 
-    public async Task<Course?> GetByCodeAsync(
-    string code,
-    CancellationToken ct)
+    public async Task<Course?> GetByCodeAsync(string code, CancellationToken ct)
     {
         return await db.Courses
             .Include(c => c.Enrollments)
