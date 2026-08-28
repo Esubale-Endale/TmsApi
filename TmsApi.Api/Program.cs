@@ -304,10 +304,10 @@ if (app.Environment.IsDevelopment())
             .AddDocument("v1", "API Version 1.0")
             .AddDocument("v2", "API Version 2.0");
     });
-    using var scope = app.Services.CreateScope();
-    var context = scope.ServiceProvider.GetRequiredService<TmsDbContext>();
-    await DataSeeder.SeedCourseAsync(context);
-    await DataSeeder.SeedStudentAsync(context);
+    // using var scope = app.Services.CreateScope();
+    // var context = scope.ServiceProvider.GetRequiredService<TmsDbContext>();
+    // await DataSeeder.SeedCourseAsync(context);
+    // await DataSeeder.SeedStudentAsync(context);
 }
 else if (app.Environment.IsProduction())
 {
@@ -315,3 +315,5 @@ else if (app.Environment.IsProduction())
 }
 
 app.Run();
+
+public partial class Program { }
