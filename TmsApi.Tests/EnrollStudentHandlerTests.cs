@@ -22,7 +22,6 @@ public class EnrollStudentHandlerTests
 
         // Course lookup runs first in the handler; return any non-null
         // course so the duplicate check is the branch under test..
-        // var course = new CourseResponseDto(1, "CS-401", "Advanced Web Dev", 35, 2);        
 
         var course = new Course
         {
@@ -57,21 +56,21 @@ public class EnrollStudentHandlerTests
         var enrollmentService = Substitute.For<IEnrollmentService>();
         var courseService = Substitute.For<ICourseService>();
 
-        var course = new CourseResponseDto(1, "CS-401", "Advanced Web Dev", 35, 2);
+        // var course = new CourseResponseDto(1, "CS-401", "Advanced Web Dev", 35, 2);
 
-        // var course = new Course
-        // {
-        //     Id = 1,
-        //     Code = "CS-401",
-        //     Title = "Advanced Web Dev",
-        //     MaxCapacity = 35,
-        //     Enrollments = Enumerable.Range(1, 35)
-        // .Select(i => new Enrollment { Id = i, CourseId = 1, Status = Domain.Enums.EnrollmentStatus.Pending })
-        // .ToList()
-        // };
+        var course = new Course
+        {
+            Id = 1,
+            Code = "CS-401",
+            Title = "Advanced Web Dev",
+            MaxCapacity = 35,
+            Enrollments = Enumerable.Range(1, 35)
+        .Select(i => new Enrollment { Id = i, CourseId = 1, Status = Domain.Enums.EnrollmentStatus.Pending })
+        .ToList()
+        };
         courseService
-        .GetByCodeAsync("CS-401", Arg.Any<CancellationToken>())
-        .Returns(Task.FromResult<CourseResponseDto?>(course));
+        .GetCourseEntityByCodeAsync("CS-401", Arg.Any<CancellationToken>())
+        .Returns(Task.FromResult<Course?>(course));
         var handler = new EnrollStudentHandler(enrollmentService, courseService); var command = new EnrollStudentCommand(StudentId: 100, CourseCode: "CS-401");// Act
         var result = await handler.Handle(command, CancellationToken.None);// Assert: typed error matches the M7 sealed-record factory
         Assert.False(result.IsSuccess);
@@ -87,25 +86,24 @@ public class EnrollStudentHandlerTests
         // Arrange: course has room, student is not already enrolled; expect one// AddAsync call.
         var enrollmentService = Substitute.For<IEnrollmentService>();
         var courseService = Substitute.For<ICourseService>();
-        var course = new CourseResponseDto(1, "CS-401", "Advanced Web Dev", 35, 2);
-        // {
-        //     Id = 1,
-        //     Code = "CS-401",
-        //     Title = "Advanced Web Dev",
-        //     MaxCapacity = 35,
-        //     EnrollmentCount = 2
-        //     // Enrollments = Enumerable
-        //     //                     .Range(1, 20)
-        //     //                     .Select(i => new Enrollment { Id = i, CourseId = 1, Status = Domain.Enums.EnrollmentStatus.Pending, })
-        //     //                     .ToList(),
-        // };
+        var course = new Course
+        {
+            Id = 1,
+            Code = "CS-401",
+            Title = "Advanced Web Dev",
+            MaxCapacity = 35,
+            Enrollments = Enumerable
+                                .Range(1, 20)
+                                .Select(i => new Enrollment { Id = i, CourseId = 1, Status = Domain.Enums.EnrollmentStatus.Pending, })
+                                .ToList(),
+        };
 
         courseService
-            .GetByCodeAsync("CS-401", Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<CourseResponseDto?>(course));
+            .GetCourseEntityByCodeAsync("CS-401", Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult<Course?>(course));
         enrollmentService
             .ExistsAsync(100, "CS-401", Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult(false));
+                .Returns(Task.FromResult(false));
 
         var handler = new EnrollStudentHandler(enrollmentService, courseService); var command = new EnrollStudentCommand(StudentId: 100, CourseCode: "CS-401");// Act
         var result = await handler.Handle(command, CancellationToken.None);// Assert: handler produced a typed success payload with the rightIDsAssert.True(result.IsSuccess);
