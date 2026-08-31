@@ -7,16 +7,11 @@ using TmsApi.Application.Interfaces;
 
 namespace TmsApi.Infrastructure.Services;
 
-public class EnrollmentService : IEnrollmentService
+public class EnrollmentService(TmsDbContext db, ILogger<EnrollmentService> logger) : IEnrollmentService
 {
-    private readonly TmsDbContext _db;
-    private readonly ILogger<EnrollmentService> _logger;
+    private readonly TmsDbContext _db = db;
+    private readonly ILogger<EnrollmentService> _logger = logger;
 
-    public EnrollmentService(TmsDbContext db, ILogger<EnrollmentService> logger)
-    {
-        _db = db;
-        _logger = logger;
-    }
     public Task<EnrollmentResponseDto?> GetByIdAsync(int courseId, int id, CancellationToken ct) =>
         _db.Enrollments
             .AsNoTracking()
