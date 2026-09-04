@@ -8,10 +8,8 @@ public class CreateStudentValidator : AbstractValidator<CreateStudentCommand>
     {
         RuleFor(x => x.Name)
             .NotEmpty();
-
         RuleFor(x => x.RegistrationNumber)
             .NotEmpty();
-
         RuleFor(x => x.GPA)
             .InclusiveBetween(0, 4);
     }

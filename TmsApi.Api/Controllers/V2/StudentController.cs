@@ -17,8 +17,7 @@ public class StudentController(IMediator mediator) : ControllerBase
 {
 
     [HttpGet]
-    public async Task<IActionResult> GetStudents(
-     CancellationToken cancellationToken)
+    public async Task<IActionResult> GetStudents(CancellationToken cancellationToken)
     {
         var students = await mediator.Send(
             new GetStudentsQuery(),

@@ -23,8 +23,15 @@ public class TmsDbContext(DbContextOptions<TmsDbContext> options) : IdentityDbCo
             entity.Property(refreshToken => refreshToken.Token).IsRequired();
             entity.Property(refreshToken => refreshToken.UserId).IsRequired();
         });
-        modelBuilder.ApplyConfigurationsFromAssembly(
-            typeof(TmsDbContext).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(TmsDbContext).Assembly);
+        modelBuilder.Entity<Student>(entity =>
+        {
+            entity.HasIndex(s => s.UserId).IsUnique();
+            entity.HasOne<TmsUser>()
+                .WithOne()
+                .HasForeignKey<Student>(s => s.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
     }
 
 }

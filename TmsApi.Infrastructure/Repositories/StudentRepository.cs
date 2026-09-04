@@ -9,13 +9,11 @@ public class StudentRepository(TmsDbContext context) : IStudentRepository
 {
     public async Task<List<Student>> GetAllAsync(CancellationToken ct)
     {
-        return await context.Students
-            .ToListAsync(ct);
+        return await context.Students.ToListAsync(ct);
     }
     public async Task<Student?> GetByIdAsync(int id, CancellationToken ct)
     {
-        return await context.Students
-            .FirstOrDefaultAsync(s => s.Id == id, ct);
+        return await context.Students.FirstOrDefaultAsync(s => s.Id == id, ct);
     }
 
     public async Task AddAsync(Student student, CancellationToken ct)

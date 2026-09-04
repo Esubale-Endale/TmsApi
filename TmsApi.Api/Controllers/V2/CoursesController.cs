@@ -9,7 +9,7 @@ using TmsApi.Infrastructure.Persistence;
 
 namespace TmsApi.Api.Controllers.V2;
 
-[Authorize(Roles = "Admin,Instructor")]
+[Authorize(Roles = "Admin,Instructor,Student")]
 [ApiController]
 [ApiExplorerSettings(GroupName = "v2")]
 [Route("api/V{version:apiVersion}/courses")]
